@@ -1,0 +1,65 @@
+{
+    "Crawler": {
+        "checkpoints": [
+            {
+                "steps": 4499359,
+                "file_path": "results\\newAnim0002\\Crawler\\Crawler-4499359.onnx",
+                "reward": 1105.0278099907769,
+                "creation_time": 1765255424.8589983,
+                "auxillary_file_paths": [
+                    "results\\newAnim0002\\Crawler\\Crawler-4499359.pt"
+                ]
+            },
+            {
+                "steps": 4999762,
+                "file_path": "results\\newAnim0002\\Crawler\\Crawler-4999762.onnx",
+                "reward": 1263.2297929724057,
+                "creation_time": 1765259759.84391,
+                "auxillary_file_paths": [
+                    "results\\newAnim0002\\Crawler\\Crawler-4999762.pt"
+                ]
+            },
+            {
+                "steps": 5499840,
+                "file_path": "results\\newAnim0002\\Crawler\\Crawler-5499840.onnx",
+                "reward": 1207.9896270751954,
+                "creation_time": 1765264096.255739,
+                "auxillary_file_paths": [
+                    "results\\newAnim0002\\Crawler\\Crawler-5499840.pt"
+                ]
+            },
+            {
+                "steps": 5999611,
+                "file_path": "results\\newAnim0002\\Crawler\\Crawler-5999611.onnx",
+                "reward": 1438.430908203125,
+                "creation_time": 1765268439.4627252,
+                "auxillary_file_paths": [
+                    "results\\newAnim0002\\Crawler\\Crawler-5999611.pt"
+                ]
+            },
+            {
+                "steps": 6265195,
+                "file_path": "results\\newAnim0002\\Crawler\\Crawler-6265195.onnx",
+                "reward": null,
+                "creation_time": 1765286339.6858816,
+                "auxillary_file_paths": [
+                    "results\\newAnim0002\\Crawler\\Crawler-6265195.pt"
+                ]
+            }
+        ],
+        "final_checkpoint": {
+            "steps": 6265195,
+            "file_path": "results\\newAnim0002\\Crawler.onnx",
+            "reward": null,
+            "creation_time": 1765286339.6858816,
+            "auxillary_file_paths": [
+                "results\\newAnim0002\\Crawler\\Crawler-6265195.pt"
+            ]
+        }
+    },
+    "metadata": {
+        "stats_format_version": "0.3.0",
+        "mlagents_version": "1.2.0.dev0",
+        "torch_version": "2.2.2+cu121"
+    }
+}

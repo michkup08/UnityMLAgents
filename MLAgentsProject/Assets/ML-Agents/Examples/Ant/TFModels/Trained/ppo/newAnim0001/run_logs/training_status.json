@@ -1,0 +1,56 @@
+{
+    "Crawler": {
+        "checkpoints": [
+            {
+                "steps": 499048,
+                "file_path": "results\\newAnim0001\\Crawler\\Crawler-499048.onnx",
+                "reward": 87.56904673576355,
+                "creation_time": 1764960525.3976882,
+                "auxillary_file_paths": [
+                    "results\\newAnim0001\\Crawler\\Crawler-499048.pt"
+                ]
+            },
+            {
+                "steps": 999369,
+                "file_path": "results\\newAnim0001\\Crawler\\Crawler-999369.onnx",
+                "reward": 431.66325658910415,
+                "creation_time": 1764964381.9406235,
+                "auxillary_file_paths": [
+                    "results\\newAnim0001\\Crawler\\Crawler-999369.pt"
+                ]
+            },
+            {
+                "steps": 1499624,
+                "file_path": "results\\newAnim0001\\Crawler\\Crawler-1499624.onnx",
+                "reward": 723.9043609698614,
+                "creation_time": 1765018914.1514041,
+                "auxillary_file_paths": [
+                    "results\\newAnim0001\\Crawler\\Crawler-1499624.pt"
+                ]
+            },
+            {
+                "steps": 1599198,
+                "file_path": "results\\newAnim0001\\Crawler\\Crawler-1599198.onnx",
+                "reward": 599.2397308349609,
+                "creation_time": 1765019958.274813,
+                "auxillary_file_paths": [
+                    "results\\newAnim0001\\Crawler\\Crawler-1599198.pt"
+                ]
+            }
+        ],
+        "final_checkpoint": {
+            "steps": 1599198,
+            "file_path": "results\\newAnim0001\\Crawler.onnx",
+            "reward": 599.2397308349609,
+            "creation_time": 1765019958.274813,
+            "auxillary_file_paths": [
+                "results\\newAnim0001\\Crawler\\Crawler-1599198.pt"
+            ]
+        }
+    },
+    "metadata": {
+        "stats_format_version": "0.3.0",
+        "mlagents_version": "1.2.0.dev0",
+        "torch_version": "2.2.2+cu121"
+    }
+}

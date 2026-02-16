@@ -1,0 +1,47 @@
+{
+    "Crawler": {
+        "checkpoints": [
+            {
+                "steps": 499017,
+                "file_path": "results\\newAnim0004\\Crawler\\Crawler-499017.onnx",
+                "reward": 58.47295391559601,
+                "creation_time": 1765540079.0956862,
+                "auxillary_file_paths": [
+                    "results\\newAnim0004\\Crawler\\Crawler-499017.pt"
+                ]
+            },
+            {
+                "steps": 873439,
+                "file_path": "results\\newAnim0004\\Crawler\\Crawler-873439.onnx",
+                "reward": 318.19117228190106,
+                "creation_time": 1765542825.3378668,
+                "auxillary_file_paths": [
+                    "results\\newAnim0004\\Crawler\\Crawler-873439.pt"
+                ]
+            },
+            {
+                "steps": 874439,
+                "file_path": "results\\newAnim0004\\Crawler\\Crawler-874439.onnx",
+                "reward": 297.6634826660156,
+                "creation_time": 1765543852.0341518,
+                "auxillary_file_paths": [
+                    "results\\newAnim0004\\Crawler\\Crawler-874439.pt"
+                ]
+            }
+        ],
+        "final_checkpoint": {
+            "steps": 874439,
+            "file_path": "results\\newAnim0004\\Crawler.onnx",
+            "reward": 297.6634826660156,
+            "creation_time": 1765543852.0341518,
+            "auxillary_file_paths": [
+                "results\\newAnim0004\\Crawler\\Crawler-874439.pt"
+            ]
+        }
+    },
+    "metadata": {
+        "stats_format_version": "0.3.0",
+        "mlagents_version": "1.2.0.dev0",
+        "torch_version": "2.2.2+cu121"
+    }
+}
