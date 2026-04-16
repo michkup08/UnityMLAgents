@@ -3,6 +3,8 @@
 /summaries
 # Output Artifacts
 /results
+/config/*/results
+/MLAgentsProject/Assets/ML-Agents/Examples/*/TFModels
 # Output Builds
 /Builds
 
