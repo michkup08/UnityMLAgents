@@ -25,7 +25,7 @@ namespace Unity.MLAgents
         /// <summary>
         /// The frequency with which the agent requests a decision. A DecisionPeriod of 5 means
         /// that the Agent will request a decision every 5 Academy steps. /// </summary>
-        [Range(1, 20)]
+        [Range(1, 100)]
         [Tooltip("The frequency with which the agent requests a decision. A DecisionPeriod " +
             "of 5 means that the Agent will request a decision every 5 Academy steps.")]
         public int DecisionPeriod = 5;
@@ -51,8 +51,9 @@ namespace Unity.MLAgents
         [FormerlySerializedAs("RepeatAction")]
         public bool TakeActionsBetweenDecisions = true;
 
-        [NonSerialized]
-        Agent m_Agent;
+        //[NonSerialized]
+        [FormerlySerializedAs("Skrypt agenta")]
+        public Agent m_Agent;
 
         /// <summary>
         /// Get the Agent attached to the DecisionRequester.
@@ -65,7 +66,10 @@ namespace Unity.MLAgents
         internal void Awake()
         {
             Debug.Assert(DecisionStep < DecisionPeriod, "DecisionStep must be between 0 and DecisionPeriod - 1.");
-            m_Agent = gameObject.GetComponent<Agent>();
+            if (!m_Agent)
+            {
+                m_Agent = gameObject.GetComponent<Agent>();
+            }
             Debug.Assert(m_Agent != null, "Agent component was not found on this gameObject and is required.");
             Academy.Instance.AgentPreStep += MakeRequests;
         }

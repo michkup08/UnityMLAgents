@@ -11,7 +11,8 @@ namespace Unity.MLAgentsExamples
     [DisallowMultipleComponent]
     public class GroundContact : MonoBehaviour
     {
-        [HideInInspector] public Agent agent;
+        //[HideInInspector]
+        public Agent agent;
 
         [Header("Ground Check")] public bool agentDoneOnGroundContact; // Whether to reset agent on ground contact.
         public bool penalizeGroundContact; // Whether to penalize on contact.

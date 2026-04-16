@@ -491,14 +491,16 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 465329138793274812}
   serializedVersion: 2
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: -1.347, z: -0}
+  m_LocalRotation: {x: 0.70697504, y: -0, z: -0, w: 0.7072385}
+  m_LocalPosition: {x: 0, y: 0.055498123, z: -0.58899987}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 1516315800957513466}
   - {fileID: 4673568387198863766}
-  m_Father: {fileID: 1233296093213232672}
+  - {fileID: 5256256178417620817}
+  - {fileID: 4816549488619691721}
+  m_Father: {fileID: 373928803490704349}
   m_LocalEulerAnglesHint: {x: 89.98, y: 0, z: 0}
 --- !u!136 &6558546044411416705
 CapsuleCollider:
@@ -680,8 +682,8 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 695262445087369431}
   serializedVersion: 2
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 0.056, z: 1.99}
+  m_LocalRotation: {x: -0.70697504, y: -0, z: -0, w: 0.7072385}
+  m_LocalPosition: {x: 0, y: 1.2319999, z: 0.00045907497}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -689,9 +691,8 @@ Transform:
   - {fileID: 8884421813899675716}
   - {fileID: 5215811021665883742}
   - {fileID: 6814631078364456410}
-  - {fileID: 1233296093213232672}
   - {fileID: 5736680914415616677}
-  m_Father: {fileID: 532064817621206178}
+  m_Father: {fileID: 1233296093213232672}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!54 &8439845588626081851
 Rigidbody:
@@ -1095,14 +1096,14 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1080879700789120002}
   serializedVersion: 2
-  m_LocalRotation: {x: -0.27059802, y: 0.6532815, z: 0.6532815, w: 0.27059802}
-  m_LocalPosition: {x: -0.645, y: -0, z: 1.357}
+  m_LocalRotation: {x: -0.3826834, y: 0.92387956, z: 0.00017210841, w: 0.00007128716}
+  m_LocalPosition: {x: -0.645, y: 0.59897906, z: 0.056223154}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 7469677911140481110}
   - {fileID: 828691794333780296}
-  m_Father: {fileID: 532064817621206178}
+  m_Father: {fileID: 1233296093213232672}
   m_LocalEulerAnglesHint: {x: -90, y: 180, z: 0}
 --- !u!136 &920841927855191580
 CapsuleCollider:
@@ -1301,14 +1302,14 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1173459465204525492}
   serializedVersion: 2
-  m_LocalRotation: {x: -0.6532815, y: 0.2705981, z: 0.2705981, w: 0.6532815}
-  m_LocalPosition: {x: -0.578, y: -0, z: -1.664}
+  m_LocalRotation: {x: -0.9238795, y: 0.38268352, z: 0.000071287155, w: 0.00017210841}
+  m_LocalPosition: {x: -0.578, y: -1.0750207, z: 0.05509758}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 881479775245101875}
   - {fileID: 4956988882772568761}
-  m_Father: {fileID: 532064817621206178}
+  m_Father: {fileID: 2182147980963709993}
   m_LocalEulerAnglesHint: {x: -90, y: 90, z: 0}
 --- !u!136 &8602539721022800733
 CapsuleCollider:
@@ -1944,13 +1945,8 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
-  - {fileID: 3123720339754023117}
-  - {fileID: 373928803490704349}
   - {fileID: 4885848699528548242}
-  - {fileID: 5256256178417620817}
-  - {fileID: 4816549488619691721}
-  - {fileID: 4242536403331379215}
-  - {fileID: 775818643924982386}
+  - {fileID: 373928803490704349}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &8193407667342405291
@@ -2565,13 +2561,15 @@ Transform:
   m_GameObject: {fileID: 4108313010071069699}
   serializedVersion: 2
   m_LocalRotation: {x: 0.70697504, y: -0, z: -0, w: 0.7072385}
-  m_LocalPosition: {x: 0, y: 0, z: -1.232}
+  m_LocalPosition: {x: 0, y: 0.055999994, z: 0.758}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 8387489751097222448}
-  - {fileID: 2182147980963709993}
-  m_Father: {fileID: 3123720339754023117}
+  - {fileID: 3123720339754023117}
+  - {fileID: 4242536403331379215}
+  - {fileID: 775818643924982386}
+  m_Father: {fileID: 373928803490704349}
   m_LocalEulerAnglesHint: {x: 89.98, y: 0, z: 0}
 --- !u!136 &1637819779022326849
 CapsuleCollider:
@@ -3343,7 +3341,9 @@ Transform:
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
-  m_Children: []
+  m_Children:
+  - {fileID: 1233296093213232672}
+  - {fileID: 2182147980963709993}
   m_Father: {fileID: 532064817621206178}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!33 &8249413164043361648
@@ -4419,14 +4419,14 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 7910805140087441397}
   serializedVersion: 2
-  m_LocalRotation: {x: -0.2705981, y: -0.6532815, z: -0.6532815, w: 0.2705981}
-  m_LocalPosition: {x: 0.76, y: 0, z: 1.351}
+  m_LocalRotation: {x: -0.38268352, y: -0.9238795, z: -0.00017210841, w: 0.000071287155}
+  m_LocalPosition: {x: 0.76, y: 0.592979, z: 0.05622095}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 3705642314340701613}
   - {fileID: 7709837330054037634}
-  m_Father: {fileID: 532064817621206178}
+  m_Father: {fileID: 1233296093213232672}
   m_LocalEulerAnglesHint: {x: -90, y: -90, z: 0}
 --- !u!136 &1350934984551153976
 CapsuleCollider:
@@ -4625,14 +4625,14 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 7946069619932681487}
   serializedVersion: 2
-  m_LocalRotation: {x: -0.6532815, y: -0.27059802, z: -0.27059802, w: 0.6532815}
-  m_LocalPosition: {x: 0.651, y: 0, z: -1.705}
+  m_LocalRotation: {x: -0.9238795, y: -0.38268343, z: -0.000071287155, w: 0.00017210843}
+  m_LocalPosition: {x: 0.651, y: -1.1160207, z: 0.05508232}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 4355761456495756975}
   - {fileID: 5023718476767442206}
-  m_Father: {fileID: 532064817621206178}
+  m_Father: {fileID: 2182147980963709993}
   m_LocalEulerAnglesHint: {x: -90, y: 0, z: 0}
 --- !u!136 &7309812597883645528
 CapsuleCollider:
