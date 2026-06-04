@@ -176,6 +176,7 @@ class NetworkBody(nn.Module):
         observation_specs: List[ObservationSpec],
         network_settings: NetworkSettings,
         encoded_act_size: int = 0,
+        dropout_rate: float = 0.0,
     ):
         super().__init__()
         self.normalize = network_settings.normalize
@@ -208,9 +209,20 @@ class NetworkBody(nn.Module):
                 1,
             )
         else:
-            self._body_endoder = LinearEncoder(
-                total_enc_size, network_settings.num_layers, self.h_size
-            )
+            if dropout_rate > 0.0:
+                layers = []
+                in_size = total_enc_size
+                for _ in range(network_settings.num_layers):
+                    layers.append(nn.Linear(in_size, self.h_size))
+                    layers.append(nn.LayerNorm(self.h_size))
+                    layers.append(nn.SiLU())  # Domyślna aktywacja w nowych wersjach ML-Agents (Swish)
+                    layers.append(nn.Dropout(p=dropout_rate))
+                    in_size = self.h_size
+                self._body_endoder = nn.Sequential(*layers)
+            else:
+                self._body_endoder = LinearEncoder(
+                    total_enc_size, network_settings.num_layers, self.h_size
+                )
 
         if self.use_lstm:
             self.lstm = LSTM(self.h_size, self.m_size)
@@ -458,12 +470,13 @@ class ValueNetwork(nn.Module, Critic):
         network_settings: NetworkSettings,
         encoded_act_size: int = 0,
         outputs_per_stream: int = 1,
+        dropout_rate: float = 0.0,
     ):
 
         # This is not a typo, we want to call __init__ of nn.Module
         nn.Module.__init__(self)
         self.network_body = NetworkBody(
-            observation_specs, network_settings, encoded_act_size=encoded_act_size
+            observation_specs, network_settings, encoded_act_size=encoded_act_size, dropout_rate=dropout_rate
         )
         if network_settings.memory is not None:
             encoding_size = network_settings.memory.memory_size // 2

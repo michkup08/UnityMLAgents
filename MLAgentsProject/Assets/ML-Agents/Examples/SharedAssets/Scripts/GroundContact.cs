@@ -28,15 +28,15 @@ namespace Unity.MLAgentsExamples
             if (col.transform.CompareTag(k_Ground))
             {
                 touchingGround = true;
-                if (penalizeGroundContact)
-                {
-                    agent.SetReward(groundContactPenalty);
-                }
+                //if (penalizeGroundContact)
+                //{
+                //    agent.SetReward(groundContactPenalty);
+                //}
 
-                if (agentDoneOnGroundContact)
-                {
-                    agent.EndEpisode();
-                }
+                //if (agentDoneOnGroundContact)
+                //{
+                //    agent.EndEpisode();
+                //}
             }
         }
 

@@ -1,0 +1,32 @@
+------------------------------------------------------ TD3 -----------------------------------------------------------------
+
+- Przy początkowym środowisku na którym ppo i sac działały prawidłowo, ponieważ są stochastyczne i entropia nagradza je za "wierzganie", co pozwala na dalsze próby. W td3 tego nie ma bo model jest deterministyczny więc model w następnych próbach "zastyga w miejscu" (Policy Collapse (Zapaść polityki) lub Stiff Robot Problem (Problem sztywnego robota).
+
+- Dodano zewnętrzny szum eksploracyjny - szum ornsteina-uhlenbecka - następne ruchy mają większą tendencję do zachowywania podobieństwa do poprzednich w porównaniu do całkiem losowego szumu gaussa.
+
+- W td3 przez problem zastygania dodano faze rozgrzewki, gdzie model wykonuje operacje bez sieci neuronowej tylko przez sam szum. Aby zapobiec mini drganiom próba podejścia konktów kluczowych, czyli wywoływanie funkcji następnych iteracji szumu co x klatek.
+
+------------------------------------------------------- OCENA -------------------------------------------------------------
+
+* możnaby dodać koszt energii, albo spróbować jak to zadziała operując na siłach
+
+
+
+Na przyszłość metryki do oceny:
+Metryki Kaskadowe (Z TensorBoarda):
+
+Sample Efficiency – ile kroków środowiska potrzebował dany algorytm, by osiągnąć nagrodę na poziomie np. +1000.
+
+Mean Reward – maksymalna średnia nagroda po stabilizacji modelu.
+
+Metryki Kinematyczne (Przydatne do oceny "Animacji"):
+
+Energy Consumption (Cost of Transport) – średnia suma kwadratów wektora akcji w czasie epizodu. Niskie zużycie oznacza płynniejszą animację i mniejsze "szarpanie" modelem.
+
+Smoothness (Jitter) – można mierzyć, licząc różnicę (deltę) w wartościach wysyłanych do stawów klatka po klatce. Jeśli algorytm skacze od -1 do 1 co drugą klatkę, animacja jest bezużyteczna z punktu widzenia widza.
+
+Metryki Odporności (Robustness):
+
+Survival Rate – procent epizodów na nierównym terenie, w których model dotarł do celu bez wywrócenia się.
+
+Podejście hybrydowe - jedna sieć do rotacji, druga do poruszania środkiem ciężkości w kierunku celu ??? problem tych samych wyjść ???

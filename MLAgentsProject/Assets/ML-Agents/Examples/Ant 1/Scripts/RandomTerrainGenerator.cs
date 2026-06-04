@@ -9,15 +9,25 @@ public class TerrainWithMaterial : MonoBehaviour
 
     [Header("Ustawienia Obszaru")]
     public Vector2 centerPos = Vector2.zero;
-    public float width = 10f;
-    public float length = 10f;
-    public int xSegments = 10;
-    public int zSegments = 10;
-
+    public float width = 100f;       // Zmieniono na 100
+    public float length = 100f;      // Zmieniono na 100
+    public int xSegments = 10;       // Zmieniono na 10
+    public int zSegments = 10;       // Zmieniono na 10
     public float height = 3.0f;
+
+    [Header("Ustawienia Generacji")]
+    public bool usePredictableSequence = true; // Flaga włączająca przewidywalność
+    public int seed = 12345;                   // Początkowe ziarno losowości
 
     public void generateRandomTerrain()
     {
+        // Ustawienie ziarna losowości dla przewidywalnej sekwencji
+        if (usePredictableSequence)
+        {
+            Random.InitState(seed);
+            seed++; // Zwiększamy seed, aby kolejny teren w sekwencji był inny, ale z góry znany
+        }
+
         // 1. Bezpieczne zarządzanie Tagiem
         try
         {

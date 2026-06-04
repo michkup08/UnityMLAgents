@@ -9,8 +9,12 @@ from mlagents.trainers.ppo.optimizer_torch import PPOSettings
 from mlagents.trainers.ppo.trainer import PPOTrainer
 from mlagents.trainers.sac.optimizer_torch import SACSettings
 from mlagents.trainers.sac.trainer import SACTrainer
-from mlagents.trainers.td3.optimizer_torch import TD3Settings
-from mlagents.trainers.td3.trainer_2 import TD3Trainer
+from mlagents.trainers.td3.optimizer_torch_td3 import TD3Settings
+from mlagents.trainers.td3.trainer_td3 import TD3Trainer
+from mlagents.trainers.ppg.optimizer_torch_ppg import PPGSettings
+from mlagents.trainers.ppg.trainer_ppg import PPGTrainer
+from mlagents.trainers.droQ.optimizer_torch import DroQSettings, TorchDroQOptimizer
+from mlagents.trainers.droQ.trainer import DroQTrainer
 from mlagents_envs import logging_util
 
 logger = logging_util.get_logger(__name__)
@@ -27,6 +31,8 @@ def get_default_trainer_types() -> Tuple[Dict[str, Any], Dict[str, Any]]:
             SACTrainer.get_trainer_name(): SACTrainer,
             POCATrainer.get_trainer_name(): POCATrainer,
             TD3Trainer.get_trainer_name(): TD3Trainer,
+            PPGTrainer.get_trainer_name(): PPGTrainer,
+            DroQTrainer.get_trainer_name(): DroQTrainer,
         }
     )
     # global all_trainer_settings
@@ -36,6 +42,8 @@ def get_default_trainer_types() -> Tuple[Dict[str, Any], Dict[str, Any]]:
             SACTrainer.get_trainer_name(): SACSettings,
             POCATrainer.get_trainer_name(): POCASettings,
             TD3Trainer.get_trainer_name(): TD3Settings,
+            PPGTrainer.get_trainer_name(): PPGSettings,
+            DroQTrainer.get_trainer_name(): DroQSettings,
         }
     )
 

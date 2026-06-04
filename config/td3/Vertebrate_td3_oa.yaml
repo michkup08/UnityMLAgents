@@ -1,0 +1,24 @@
+behaviors:
+  Vertebate:
+    trainer_type: td3   # <-- Zakładam, że tak nazwałeś go w kodzie Pythona (TRAINER_NAME = "td3")
+    hyperparameters:
+      batch_size: 256
+      buffer_size: 1000000
+      learning_rate: 0.0003
+      learning_rate_schedule: constant # TD3 zazwyczaj woli stały LR, bez opadania
+      # Poniższe parametry ML-Agents prześle do klasy OffPolicyTrainer
+      buffer_init_steps: 10000 # Ile losowych kroków zebrać, zanim zaczniemy liczyć gradienty (Warmup)
+      steps_per_update: 1      # Aktualizuj wagi po każdym nowym kroku środowiska
+      save_replay_buffer: false
+    network_settings:
+      normalize: false         # Nasza klasa sama obsługuje normalizację
+      hidden_units: 256        # Standard w Spinning Up to 256 ukrytych neuronów
+      num_layers: 2            # Dwie ukryte warstwy dla Aktora i Krytyków
+      # deterministic: true      # TD3 jest deterministyczny, bez rozkładu akcji
+    reward_signals:
+      extrinsic:
+        gamma: 0.99
+        strength: 1.0
+    max_steps: 5000000
+    time_horizon: 1000         # Maksymalna długość epizodu zanim wymusimy reset
+    summary_freq: 10000

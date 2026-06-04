@@ -2,8 +2,9 @@ behaviors:
   Vertebate:
     trainer_type: td3
     hyperparameters:
-      learning_rate: 0.0003
-      learning_rate_schedule: constant
+      learning_rate: 0.0001
+      # learning_rate_schedule: constant
+      learning_rate_schedule: linear                                   
       batch_size: 256
       buffer_size: 500000
       buffer_init_steps: 50000
@@ -20,7 +21,7 @@ behaviors:
       hidden_units: 512
       num_layers: 3
       vis_encode_type: simple
-      deterministic: true
+      # deterministic: true
     reward_signals:
       extrinsic:
         gamma: 0.995

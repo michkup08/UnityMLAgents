@@ -42,21 +42,94 @@ class OUNoise:
         self.state = x + dx
         return self.state
 
+# class TD3NoisePolicy(TorchPolicy):
+#     def __init__(self, *args, 
+#                  start_noise: float = 0.5,   
+#                  end_noise: float = 0.05,    
+#                  decay_steps: int = 500000,  
+#                  warmup_steps: int = 50000,
+#                  **kwargs):
+#         super().__init__(*args, **kwargs)
+#         self.start_noise = start_noise
+#         self.end_noise = end_noise
+#         self.decay_steps = decay_steps
+#         self.warmup_steps = warmup_steps
+#         self.ou_noise = None
+        
+#         # Własny, niezawodny licznik klatek środowiska
+#         self.eval_step = 0 
+
+#     def evaluate(self, decision_requests, global_agent_ids: list) -> Dict[str, Any]:
+#         run_out = super().evaluate(decision_requests, global_agent_ids)
+#         action_tuple = run_out.get("action")
+        
+#         if action_tuple is not None and action_tuple.continuous is not None:
+#             self.eval_step += 1
+#             raw_actions = action_tuple.continuous 
+
+#             # Inicjalizacja OU Noise (potrzebny od 1. klatki)
+#             if self.ou_noise is None:
+#                 action_size = raw_actions.shape[1]
+#                 self.ou_noise = OUNoise(action_size, theta=0.2, sigma=0.4)
+
+#             # --------------------------------------------------
+#             # 1. FAZA ROZGRZEWKI (Płynny, potężny szum OU)
+#             # --------------------------------------------------
+#             if self.eval_step < self.warmup_steps:
+#                 # Ignorujemy sieć neuronową. Bierzemy tylko szum OU z ogromną siłą.
+#                 # noise = np.array([self.ou_noise.sample() for _ in range(raw_actions.shape[0])])
+#                 noise = self.ou_noise.sample(raw_actions.shape[0])
+                
+#                 # Mnożymy szum razy 2, aby po przejściu przez Tanh dotykał skrajnych granic (-1 do 1)
+#                 run_out["action"] = ActionTuple(
+#                     continuous=np.float32(np.tanh(noise)), 
+#                     discrete=action_tuple.discrete
+#                 )
+
+#                 # if self.eval_step % 100 == 0:
+#                 # Wypisze na ekran surowe akcje po dodaniu szumu (dla pierwszego agenta na scenie)
+#                 # logger.info(f"Krok {self.eval_step} | Surowy Szum: {noise[0]} | Po Tanh: {final_actions[0]}")
+
+#                 return run_out 
+
+#             # --------------------------------------------------
+#             # 2. FAZA NAUKI (Sieć neuronowa + malejący szum)
+#             # --------------------------------------------------
+#             fraction = min(1.0, max(0.0, (self.eval_step - self.warmup_steps) / self.decay_steps))
+#             current_noise_scale = self.start_noise - fraction * (self.start_noise - self.end_noise)
+
+#             # noise = np.array([self.ou_noise.sample() for _ in range(raw_actions.shape[0])])
+#             noise = self.ou_noise.sample(raw_actions.shape[0])
+            
+#             # Wstrzykujemy osłabiony szum OU do logitów i ucinamy
+#             noisy_raw = raw_actions + (noise * current_noise_scale)
+#             final_actions = np.tanh(noisy_raw)
+            
+#             run_out["action"] = ActionTuple(
+#                 continuous=np.float32(final_actions), 
+#                 discrete=action_tuple.discrete
+#             )
+#         return run_out
+ 
+    
+# probnie podejscie z punktami kluczowymi co x klatek
 class TD3NoisePolicy(TorchPolicy):
     def __init__(self, *args, 
                  start_noise: float = 0.5,   
                  end_noise: float = 0.05,    
                  decay_steps: int = 500000,  
                  warmup_steps: int = 50000,
+                 action_hold_steps: int = 15,  # NOWE: Ile klatek trzymamy wylosowany szum
                  **kwargs):
         super().__init__(*args, **kwargs)
         self.start_noise = start_noise
         self.end_noise = end_noise
         self.decay_steps = decay_steps
         self.warmup_steps = warmup_steps
-        self.ou_noise = None
+        self.action_hold_steps = action_hold_steps
         
-        # Własny, niezawodny licznik klatek środowiska
+        self.ou_noise = None
+        self.current_held_noise = None  # NOWE: Pamięć ostatniego punktu docelowego
         self.eval_step = 0 
 
     def evaluate(self, decision_requests, global_agent_ids: list) -> Dict[str, Any]:
@@ -64,44 +137,48 @@ class TD3NoisePolicy(TorchPolicy):
         action_tuple = run_out.get("action")
         
         if action_tuple is not None and action_tuple.continuous is not None:
-            self.eval_step += 1
             raw_actions = action_tuple.continuous 
+            batch_size = raw_actions.shape[0]
 
-            # Inicjalizacja OU Noise (potrzebny od 1. klatki)
+            # Inicjalizacja OU Noise
             if self.ou_noise is None:
                 action_size = raw_actions.shape[1]
-                self.ou_noise = OUNoise(action_size, theta=0.2, sigma=0.4)
+                # Theta i Sigma mogą być teraz mocniejsze, bo ruchy i tak będą rzadsze
+                self.ou_noise = OUNoise(action_size, theta=0.2, sigma=0.5)
 
             # --------------------------------------------------
-            # 1. FAZA ROZGRZEWKI (Płynny, potężny szum OU)
+            # MECHANIZM PUNKTÓW DOCELOWYCH (HOLD)
+            # --------------------------------------------------
+            # Odświeżamy punkt docelowy tylko co X klatek (lub gdy zmieni się liczba agentów)
+            if (self.current_held_noise is None or 
+                self.eval_step % self.action_hold_steps == 0 or 
+                self.current_held_noise.shape[0] != batch_size):
+                
+                self.current_held_noise = self.ou_noise.sample(batch_size)
+
+            # Bierzemy zamrożony szum z pamięci
+            noise = self.current_held_noise
+
+            # --------------------------------------------------
+            # 1. FAZA ROZGRZEWKI
             # --------------------------------------------------
             if self.eval_step < self.warmup_steps:
-                # Ignorujemy sieć neuronową. Bierzemy tylko szum OU z ogromną siłą.
-                # noise = np.array([self.ou_noise.sample() for _ in range(raw_actions.shape[0])])
-                noise = self.ou_noise.sample(raw_actions.shape[0])
-                
-                # Mnożymy szum razy 2, aby po przejściu przez Tanh dotykał skrajnych granic (-1 do 1)
+                # Ponieważ trzymamy cel przez 15 klatek, możemy sobie pozwolić na 
+                # agresywniejszy mnożnik (np. 1.5). Nogi w końcu zdążą się wyprostować.
                 run_out["action"] = ActionTuple(
-                    continuous=np.float32(np.tanh(noise)), 
+                    continuous=np.float32(np.tanh(noise * 1.5)), 
                     discrete=action_tuple.discrete
                 )
-
-                # if self.eval_step % 100 == 0:
-                # Wypisze na ekran surowe akcje po dodaniu szumu (dla pierwszego agenta na scenie)
-                # logger.info(f"Krok {self.eval_step} | Surowy Szum: {noise[0]} | Po Tanh: {final_actions[0]}")
-
+                self.eval_step += 1
                 return run_out 
 
             # --------------------------------------------------
-            # 2. FAZA NAUKI (Sieć neuronowa + malejący szum)
+            # 2. FAZA NAUKI
             # --------------------------------------------------
             fraction = min(1.0, max(0.0, (self.eval_step - self.warmup_steps) / self.decay_steps))
             current_noise_scale = self.start_noise - fraction * (self.start_noise - self.end_noise)
-
-            # noise = np.array([self.ou_noise.sample() for _ in range(raw_actions.shape[0])])
-            noise = self.ou_noise.sample(raw_actions.shape[0])
             
-            # Wstrzykujemy osłabiony szum OU do logitów i ucinamy
+            # Wstrzykujemy osłabiony, ale wciąż "zamrożony" szum do logitów
             noisy_raw = raw_actions + (noise * current_noise_scale)
             final_actions = np.tanh(noisy_raw)
             
@@ -109,9 +186,10 @@ class TD3NoisePolicy(TorchPolicy):
                 continuous=np.float32(final_actions), 
                 discrete=action_tuple.discrete
             )
+            
+            self.eval_step += 1
+            
         return run_out
-    
-
 
 TRAINER_NAME = "td3"
 
