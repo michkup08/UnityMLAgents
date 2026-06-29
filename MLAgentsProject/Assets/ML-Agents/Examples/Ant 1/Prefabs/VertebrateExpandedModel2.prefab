@@ -950,7 +950,7 @@ ConfigurableJoint:
     spring: 0
     damper: 0
   m_LowAngularXLimit:
-    limit: -90
+    limit: -150
     bounciness: 0
     contactDistance: 0
   m_HighAngularXLimit:
@@ -1258,7 +1258,7 @@ GameObject:
   - component: {fileID: 5915229387764496750}
   m_Layer: 0
   m_Name: BodySeg1
-  m_TagString: Untagged
+  m_TagString: agent
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -1671,7 +1671,7 @@ GameObject:
   - component: {fileID: 3787164376345829958}
   m_Layer: 0
   m_Name: BodySeg2
-  m_TagString: Untagged
+  m_TagString: agent
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -1964,6 +1964,7 @@ GameObject:
   - component: {fileID: 6744250354868185488}
   - component: {fileID: 5509779279791924877}
   - component: {fileID: 348881603570103323}
+  - component: {fileID: 803978574948206674}
   m_Layer: 0
   m_Name: foreleg2 (1)
   m_TagString: agent
@@ -2139,6 +2140,23 @@ ConfigurableJoint:
   m_EnablePreprocessing: 1
   m_MassScale: 1
   m_ConnectedMassScale: 1
+--- !u!114 &803978574948206674
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2056831751572560446}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2666e257ea992476cae0f7f163165e71, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  agent: {fileID: 8292246824395233249}
+  agentDoneOnGroundContact: 0
+  penalizeGroundContact: 0
+  groundContactPenalty: 0
+  touchingGround: 0
 --- !u!1 &2066548225590600499
 GameObject:
   m_ObjectHideFlags: 0
@@ -2668,6 +2686,7 @@ GameObject:
   - component: {fileID: 1428708130423213514}
   - component: {fileID: 4053442373047800414}
   - component: {fileID: 3894003189961155731}
+  - component: {fileID: 3299579387396018202}
   m_Layer: 0
   m_Name: foreleg0 (1)
   m_TagString: agent
@@ -2777,7 +2796,7 @@ ConfigurableJoint:
     bounciness: 0
     contactDistance: 0
   m_HighAngularXLimit:
-    limit: 100
+    limit: 150
     bounciness: 0
     contactDistance: 0
   m_AngularYZLimitSpring:
@@ -2843,6 +2862,23 @@ ConfigurableJoint:
   m_EnablePreprocessing: 1
   m_MassScale: 1
   m_ConnectedMassScale: 1
+--- !u!114 &3299579387396018202
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3021516460890362435}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2666e257ea992476cae0f7f163165e71, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  agent: {fileID: 8292246824395233249}
+  agentDoneOnGroundContact: 0
+  penalizeGroundContact: 0
+  groundContactPenalty: 0
+  touchingGround: 0
 --- !u!1 &3574929230221918641
 GameObject:
   m_ObjectHideFlags: 0
@@ -2855,6 +2891,7 @@ GameObject:
   - component: {fileID: 7496907931425738482}
   - component: {fileID: 7338280052814381763}
   - component: {fileID: 4041697559214026858}
+  - component: {fileID: 8505648377117982}
   m_Layer: 0
   m_Name: foreleg0 (1)
   m_TagString: agent
@@ -2964,7 +3001,7 @@ ConfigurableJoint:
     bounciness: 0
     contactDistance: 0
   m_HighAngularXLimit:
-    limit: 100
+    limit: 150
     bounciness: 0
     contactDistance: 0
   m_AngularYZLimitSpring:
@@ -3030,6 +3067,23 @@ ConfigurableJoint:
   m_EnablePreprocessing: 1
   m_MassScale: 1
   m_ConnectedMassScale: 1
+--- !u!114 &8505648377117982
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3574929230221918641}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2666e257ea992476cae0f7f163165e71, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  agent: {fileID: 8292246824395233249}
+  agentDoneOnGroundContact: 0
+  penalizeGroundContact: 0
+  groundContactPenalty: 0
+  touchingGround: 0
 --- !u!1 &3702902472057557283
 GameObject:
   m_ObjectHideFlags: 0
@@ -3545,7 +3599,7 @@ GameObject:
   - component: {fileID: 1603101006569719445}
   m_Layer: 0
   m_Name: BodySeg0
-  m_TagString: Untagged
+  m_TagString: agent
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -5099,7 +5153,7 @@ ConfigurableJoint:
     spring: 0
     damper: 0
   m_LowAngularXLimit:
-    limit: -90
+    limit: -150
     bounciness: 0
     contactDistance: 0
   m_HighAngularXLimit:
@@ -6524,6 +6578,7 @@ GameObject:
   - component: {fileID: 2435845662718133048}
   - component: {fileID: 8525129943618917398}
   - component: {fileID: 5662335991023736380}
+  - component: {fileID: 245184033293411057}
   m_Layer: 0
   m_Name: foreleg3 (1)
   m_TagString: agent
@@ -6699,6 +6754,23 @@ ConfigurableJoint:
   m_EnablePreprocessing: 1
   m_MassScale: 1
   m_ConnectedMassScale: 1
+--- !u!114 &245184033293411057
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8940842437334818591}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2666e257ea992476cae0f7f163165e71, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  agent: {fileID: 8292246824395233249}
+  agentDoneOnGroundContact: 0
+  penalizeGroundContact: 0
+  groundContactPenalty: 0
+  touchingGround: 0
 --- !u!1 &8947619065051341790
 GameObject:
   m_ObjectHideFlags: 0

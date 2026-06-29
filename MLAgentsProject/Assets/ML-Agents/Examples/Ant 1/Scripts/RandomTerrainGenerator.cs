@@ -9,6 +9,7 @@ public class TerrainWithMaterial : MonoBehaviour
 
     [Header("Ustawienia Obszaru")]
     public Vector2 centerPos = Vector2.zero;
+    public float yOffset = 0f;
     public float width = 100f;       // Zmieniono na 100
     public float length = 100f;      // Zmieniono na 100
     public int xSegments = 10;       // Zmieniono na 10
@@ -70,7 +71,7 @@ public class TerrainWithMaterial : MonoBehaviour
         {
             for (int x = 0; x <= xSegments; x++)
             {
-                heights[x, z] = Random.value * height; // Wysokość losowana od 0 do 1 * wysokość
+                heights[x, z] = yOffset + (Random.value * height);// Wysokość losowana od 0 do 1 * wysokość
             }
         }
 

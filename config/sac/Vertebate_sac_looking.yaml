@@ -6,7 +6,8 @@ behaviors:
       learning_rate: 0.0003
       learning_rate_schedule: constant #linear
       batch_size: 256
-      buffer_size: 200000
+      # buffer_size: 200000
+      buffer_size: 100000
       buffer_init_steps: 10000
       tau: 0.005
       steps_per_update: 20.0

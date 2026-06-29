@@ -110,6 +110,8 @@ public class VertebrateAgentNFExtended : Agent
 
     public bool threePartLegs = false;
 
+    private float[] recentFootContacts = new float[4];
+
     public override void Initialize()
     {
         SpawnTarget(TargetPrefab, transform.position + new Vector3(0f, 4f, 0f)); //spawn target
@@ -169,6 +171,11 @@ public class VertebrateAgentNFExtended : Agent
 
         //Set our goal walking speed
         TargetWalkingSpeed = Random.Range(7f, m_maxWalkingSpeed);
+
+        for (int i = 0; i < recentFootContacts.Length; i++)
+        {
+            recentFootContacts[i] = 0f;
+        }
 
         terrainWithMaterial.generateRandomTerrain();
     }
@@ -446,6 +453,41 @@ public class VertebrateAgentNFExtended : Agent
 
         // Przyznajemy nagrodę tylko w trakcie poprawnego realizowania głównego celu (ruchu)
         AddReward(flatPostureReward * mainGoalReward);
+
+        Transform[] feetSegments = { leg0Lower, leg1Lower, leg2Lower, leg3Lower };
+
+        if (threePartLegs)
+        {
+            feetSegments = new Transform[] { leg0Last, leg1Last, leg2Last, leg3Last };
+        }
+
+        // Parametr decydujący o "pamięci" (0.02f oznacza, że bierze pod uwagę ok. ostatnie 50-100 klatek)
+        float emaAlpha = 0.02f;
+
+        for (int i = 0; i < feetSegments.Length; i++)
+        {
+            // Czy ta stopa w tej konkretnej klatce dotyka ziemi? (1 = tak, 0 = nie)
+            float isTouching = m_JdController.bodyPartsDict[feetSegments[i]].groundContact.touchingGround ? 1f : 0f;
+
+            // Płynnie aktualizujemy historię kontaktu dla tej stopy
+            recentFootContacts[i] = Mathf.Lerp(recentFootContacts[i], isTouching, emaAlpha);
+        }
+
+        // Szukamy stopy, która dotykała ziemi najczęściej i najrzadziej w ostatnim czasie
+        float maxContact = Mathf.Max(recentFootContacts[0], recentFootContacts[1], recentFootContacts[2], recentFootContacts[3]);
+        float minContact = Mathf.Min(recentFootContacts[0], recentFootContacts[1], recentFootContacts[2], recentFootContacts[3]);
+
+        // Różnica w czasie kontaktu (0.0 to idealna symetria, wyższa wartość to utykanie/asymetria)
+        float contactDifference = maxContact - minContact;
+
+        // Sprawdzamy, czy agent w ogóle opiera się na nogach (żeby nie nagradzać latania w powietrzu)
+        
+        // Nagroda: odwracamy różnicę. Idealna symetria daje 1.0.
+        float symmetryReward = 1f - contactDifference;
+
+        // Mnożymy x0.1 (lub inną wagę) i uzależniamy od mainGoalReward, by wymuszać to tylko w trakcie ruchu do celu
+        AddReward(symmetryReward * 0.1f * mainGoalReward);
+        
 
 
         ///////////////////////nizej jest system kar, poobujemy go zastąpić systemem nagród
