@@ -34,6 +34,6 @@ Kod eksportujący wyniki do plików csv i generujący wykresy:
 Hiperparametry dla przeprowadzonych eksperymentów dla modeli PPO, SAC, PPG i DroQ znajdują się w katalogu:
 * `config/`.
 
-## 📂 Struktura autorskiego kodu
+## 📂 Wyniki
 
 Wyniki wykonanych pomiarów są w osobnym repozytorium: https://github.com/michkup08/UnityMLAgentsResults
