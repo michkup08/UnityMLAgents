@@ -33,3 +33,7 @@ Kod eksportujący wyniki do plików csv i generujący wykresy:
 ### 3. Pliki konfiguracyjne (YAML)
 Hiperparametry dla przeprowadzonych eksperymentów dla modeli PPO, SAC, PPG i DroQ znajdują się w katalogu:
 * `config/`.
+
+## 📂 Struktura autorskiego kodu
+
+Wyniki wykonanych pomiarów są w osobnym repozytorium: https://github.com/michkup08/UnityMLAgentsResults
