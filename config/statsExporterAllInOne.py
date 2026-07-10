@@ -4,9 +4,6 @@ import argparse
 import pandas as pd
 from tensorboard.backend.event_processing.event_accumulator import EventAccumulator
 
-# ==========================================
-# KONFIGURACJA EKSTRAKCJI
-# ==========================================
 BASE_DIR = r'D:\ml-agents'
 OUTPUT_DIR = r'D:\ml-agents\Wykresy_Analiza'
 OUTPUT_CSV = os.path.join(OUTPUT_DIR, 'all_training_data.csv')
@@ -23,8 +20,6 @@ def find_tfevents_files(base_dir, filter_keyword='base'):
     excluded_keywords = ['randomterrain', 'looking', 'expanded']
     
     for root, dirs, files in os.walk(base_dir):
-        # SPRAWDZENIE FOLDERU RAZ: Jeśli w folderze jest jakikolwiek plik tfevents, 
-        # pobieramy folder tylko raz i nie iterujemy niepotrzebnie po każdym pliku.
         if any(f.startswith('events.out.tfevents') for f in files):
             level_0 = os.path.basename(root)
             level_1_path = os.path.dirname(root)
@@ -70,7 +65,7 @@ def extract_data_to_dataframe(runs_info):
                         'Model': run['model'],
                         'Tag': tag,
                         'Step': e.step,
-                        'Wall_Time': e.wall_time, # DODANO: Zapisywanie czasu z zegara
+                        'Wall_Time': e.wall_time,
                         'Value': e.value
                     })
     return pd.DataFrame(all_data)

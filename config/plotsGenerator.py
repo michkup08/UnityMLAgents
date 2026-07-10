@@ -5,9 +5,6 @@ import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
 
-# ==========================================
-# KONFIGURACJA WYKRESÓW
-# ==========================================
 INPUT_CSV = r'D:\ml-agents\Wykresy_Analiza\all_training_data.csv'
 BASE_OUTPUT_DIR = r'D:\ml-agents\Wykresy_Analiza'
 
@@ -51,9 +48,6 @@ def generate_plots(filter_keyword):
     
     df = df[df['Step'] <= MAX_STEPS]
 
-    # ==========================================
-    # LOGIKA FILTROWANIA
-    # ==========================================
     if filter_keyword == 'base':
         df = df[~df['Algorithm'].str.contains('randomTerrain|looking|expanded', case=False, na=False)]
     elif filter_keyword == 'all':
@@ -72,7 +66,6 @@ def generate_plots(filter_keyword):
     df['Relative_Time_Hrs'] = (df['Wall_Time'] - min_times) / 3600.0
     df['Step_Binned'] = (df['Step'] // STEP_ROUNDING) * STEP_ROUNDING
 
-    # 1. ZESTAWIENIE ZAGREGOWANE
     print("Generowanie wykresów zagregowanych (Nagroda)...")
     df_reward = df[df['Tag'] == 'Environment/Cumulative Reward'].copy()
     if not df_reward.empty:
@@ -90,7 +83,6 @@ def generate_plots(filter_keyword):
         plt.savefig(os.path.join(out_dirs['agg'], f"Porownanie_Nagrody_{filter_keyword}.png"), dpi=300)
         plt.close()
 
-    # 5. NOWE ZADANIE: OSOBNE WYKRESY DLA KAŻDEGO ALGORYTMU (RUNS)
     print("Generowanie wykresów dla poszczególnych treningów...")
     if not df_reward.empty:
         for algo in algos_in_analysis:
@@ -114,7 +106,6 @@ def generate_plots(filter_keyword):
             plt.savefig(os.path.join(out_dirs['runs'], f"{algo}_runs_reward_10m.png"), dpi=300)
             plt.close()
 
-    # 2. EFEKTYWNOŚĆ CZASOWA
     print("Generowanie wykresów czasu nauki...")
     df_time = df[df['Tag'] == 'Environment/Cumulative Reward'].copy()
     if not df_time.empty:
@@ -133,7 +124,6 @@ def generate_plots(filter_keyword):
         plt.savefig(os.path.join(out_dirs['time'], f"Czas_Nauki_{filter_keyword}.png"), dpi=300)
         plt.close()
 
-    # 3. DŁUGOŚĆ EPIZODU
     print("Generowanie wykresów długości epizodu...")
     df_len = df[df['Tag'] == 'Environment/Episode Length'].copy()
     if not df_len.empty:
@@ -151,7 +141,6 @@ def generate_plots(filter_keyword):
         plt.savefig(os.path.join(out_dirs['len'], f"Dlugosc_Epizodu_{filter_keyword}.png"), dpi=300)
         plt.close()
 
-    # 4. ENTROPIA POLITYKI
     print("Generowanie wykresów entropii...")
     df_ent = df[df['Tag'] == 'Policy/Entropy'].copy()
     if df_ent.empty:

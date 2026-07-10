@@ -31,8 +31,8 @@ class DroQSettings(OffPolicyHyperparamSettings):
     buffer_size: int = 50000
     buffer_init_steps: int = 0
     tau: float = 0.005
-    steps_per_update: float = 1  # W DroQ możesz to znacznie zwiększyć (np. do 20)!
-    dropout_rate: float = 0.01   # <-- NOWY PARAMETR DLA DroQ
+    steps_per_update: float = 1  # W DroQ można to znacznie zwiększyć np. do 20
+    dropout_rate: float = 0.01   # to tylko dla droQ
     save_replay_buffer: bool = False
     init_entcoef: float = 1.0
     reward_signal_steps_per_update: float = attr.ib()
@@ -56,8 +56,6 @@ class TorchDroQOptimizer(TorchOptimizer):
             num_value_outs = max(sum(action_spec.discrete_branches), 1)
             num_action_ins = int(action_spec.continuous_size)
 
-            # UWAGA: W mlagents/trainers/torch_entities/networks.py musisz dodać Dropout
-            # do wewnętrznej implementacji klasy ValueNetwork.
             self.q1_network = ValueNetwork(
                 stream_names, observation_specs, network_settings, num_action_ins, num_value_outs, dropout_rate=dropout_rate
             )
@@ -331,9 +329,8 @@ class TorchDroQOptimizer(TorchOptimizer):
         else:
             q1_stream, q2_stream = q1_out, q2_out
 
-        # --- ZMIANA DroQ 1: Wyłączamy Dropout w sieci docelowej! ---
+        # Wyłączony Dropout w sieci docelowej
         self.target_network.eval() 
-        # -----------------------------------------------------------
 
         with torch.no_grad():
             if value_memories is not None:
@@ -343,9 +340,8 @@ class TorchDroQOptimizer(TorchOptimizer):
                 next_value_memories = None
             target_values, _ = self.target_network(next_obs, memories=next_value_memories, sequence_length=self.policy.sequence_length)
             
-        # --- ZMIANA DroQ 2: Włączamy go z powrotem ---
+        # Dropout spowrotem włączony
         self.target_network.train()
-        # ---------------------------------------------
 
         masks = ModelUtils.list_to_tensor(batch[BufferKey.MASKS], dtype=torch.bool)
         dones = ModelUtils.list_to_tensor(batch[BufferKey.DONE])

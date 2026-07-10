@@ -31,9 +31,9 @@ class PPGSettings(OnPolicyHyperparamSettings):
     beta_schedule: ScheduleType = ScheduleType.LINEAR
     epsilon_schedule: ScheduleType = ScheduleType.LINEAR
 
-    num_policy_updates_per_aux: int = 16  # Co ile aktualizacji polityki odpalamy fazę Aux
-    aux_epochs: int = 6                   # Ile epok w fazie Aux
-    kl_penalty_coef: float = 1.0          # Współczynnik kary za zmianę polityki w fazie Aux (beta_clone)
+    num_policy_updates_per_aux: int = 16  # co ile aktualizacji polityki odpalamy fazę Aux
+    aux_epochs: int = 6 # ile epok w fazie aux
+    kl_penalty_coef: float = 1.0 # kara za zmianę polityki w fazie aux (beta_clone)
     shared_critic: bool = False
 
 
@@ -77,7 +77,7 @@ class TorchPPGOptimizer(TorchOptimizer):
             self.trainer_settings.max_steps,
         )
         
-        # Parametry dla fazy pomocniczej (Zawsze Aktor + opcjonalnie Krytyk, jeśli nie jest współdzielony)
+        # parametry dla fazy aux (zawsze Aktor + opcjonalnie Krytyk, jeśli nie jest współdzielony)
         aux_params = list(self.policy.actor.parameters())
         if not self.hyperparameters.shared_critic:
             aux_params += list(self._critic.parameters())
@@ -94,14 +94,14 @@ class TorchPPGOptimizer(TorchOptimizer):
 
         phase1_params = list(self.policy.actor.parameters())
         if not self.hyperparameters.shared_critic:
-            # Dodajemy parametry niezależnego krytyka do optymalizatora Fazy 1
+            # parametry niezależnego krytyka dodane do optymalizatora fazy 1
             phase1_params += list(self._critic.parameters())
 
         self.actor_optimizer = torch.optim.Adam(
             phase1_params, lr=self.trainer_settings.hyperparameters.learning_rate
         )
 
-        # Inicjalizacja atrybutu dla zamrożonego aktora
+        # inicjalizacja atrybutu dla zamrożonego aktora
         self.frozen_actor = None
 
     @property
@@ -149,7 +149,7 @@ class TorchPPGOptimizer(TorchOptimizer):
         if len(value_memories) > 0:
             value_memories = torch.stack(value_memories).unsqueeze(0)
 
-        # Puszczenie danych przez Aktora
+        # puszczenie danych przez Aktora
         run_out = self.policy.actor.get_stats(
             current_obs,
             actions,
@@ -163,7 +163,7 @@ class TorchPPGOptimizer(TorchOptimizer):
         old_log_probs = ActionLogProbs.from_buffer(batch).flatten()
         loss_masks = ModelUtils.list_to_tensor(batch[BufferKey.MASKS], dtype=torch.bool)
 
-        # Standardowy loss z PPO (Clipping)
+        # standardowy loss z PPO
         policy_loss = ModelUtils.trust_region_policy_loss(
             ModelUtils.list_to_tensor(batch[BufferKey.ADVANTAGES]),
             log_probs,
@@ -182,7 +182,7 @@ class TorchPPGOptimizer(TorchOptimizer):
             values, old_values, returns, decay_eps, loss_masks
         )
 
-        # Łączony błąd do optymalizacji
+        # łączony błąd do optymalizacji
         loss = (
             policy_loss 
             + 0.5 * value_loss 
@@ -224,7 +224,7 @@ class TorchPPGOptimizer(TorchOptimizer):
         current_obs = ObsUtil.from_buffer(batch, n_obs)
         current_obs = [ModelUtils.list_to_tensor(obs) for obs in current_obs]
 
-        # Pamięć dla aktora
+        # pamięć dla aktora
         memories = [
             ModelUtils.list_to_tensor(batch[BufferKey.MEMORY][i])
             for i in range(0, len(batch[BufferKey.MEMORY]), self.policy.sequence_length)
@@ -232,7 +232,7 @@ class TorchPPGOptimizer(TorchOptimizer):
         if len(memories) > 0:
             memories = torch.stack(memories).unsqueeze(0)
 
-        # Pamięć dla krytyka
+        # pamięć dla krytyka
         value_memories = [
             ModelUtils.list_to_tensor(batch[BufferKey.CRITIC_MEMORY][i])
             for i in range(0, len(batch[BufferKey.CRITIC_MEMORY]), self.policy.sequence_length)
@@ -256,13 +256,13 @@ class TorchPPGOptimizer(TorchOptimizer):
             advantages = ModelUtils.list_to_tensor(
                 batch[RewardSignalUtil.advantage_key(name)]
             )
-            # Matematyczny trik: Return = stare GAE + nowa, lepsza funkcja wartości
+            # return = stare GAE + nowa, lepsza funkcja wartości
             returns[name] = advantages + fresh_values[name]
 
         act_masks = ModelUtils.list_to_tensor(batch[BufferKey.ACTION_MASK])
         actions = AgentAction.from_buffer(batch)
 
-        # 1. Bieżące prawdopodobieństwa z uczącego się aktora
+        # bieżące prawdopodobieństwa z uczącego się aktora
         run_out = self.policy.actor.get_stats(
             current_obs,
             actions,
@@ -272,7 +272,7 @@ class TorchPPGOptimizer(TorchOptimizer):
         )
         log_probs = run_out["log_probs"].flatten()
         
-        # 2. "Stare" prawdopodobieństwa z ZAMROŻONEGO aktora (Kotwica Fazy 1)
+        # 2. "stare" prawdopodobieństwa z zamrożonego aktora
         with torch.no_grad():
             frozen_run_out = self.frozen_actor.get_stats(
                 current_obs,
@@ -283,7 +283,7 @@ class TorchPPGOptimizer(TorchOptimizer):
             )
             old_log_probs = frozen_run_out["log_probs"].flatten()
         
-        # Wartości krytyka
+        # wartości krytyka
         values, _ = self.critic.critic_pass(
             current_obs,
             memories=value_memories,
@@ -291,16 +291,16 @@ class TorchPPGOptimizer(TorchOptimizer):
         )
         loss_masks = ModelUtils.list_to_tensor(batch[BufferKey.MASKS], dtype=torch.bool)
 
-        # Obliczanie Value Loss
+        # obliczanie value loss
         value_loss = ModelUtils.trust_region_value_loss(
             values, old_values, returns, decay_eps, loss_masks
         )
 
-        # Aproksymacja dywergencji KL dla bezpieczeństwa polityki
+        # aproksymacja dywergencji KL dla bezpieczeństwa polityki
         ratio = torch.exp(log_probs - old_log_probs)
         kl_div = torch.mean(ratio - 1.0 - torch.log(ratio + 1e-8))
 
-        # Łączony błąd fazy pomocniczej
+        # łączony błąd fazy aux
         aux_loss = value_loss + (self.hyperparameters.kl_penalty_coef * kl_div)
 
         ModelUtils.update_learning_rate(self.aux_optimizer, decay_lr)

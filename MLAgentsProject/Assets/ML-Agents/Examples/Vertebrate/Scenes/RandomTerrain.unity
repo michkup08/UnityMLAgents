@@ -902,7 +902,7 @@ PrefabInstance:
     - target: {fileID: 6813981368972186340, guid: 0058b366f9d6d44a3ba35beb06b0174b,
         type: 3}
       propertyPath: m_IsActive
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 6814265275650057734, guid: 0058b366f9d6d44a3ba35beb06b0174b,
         type: 3}
@@ -1293,7 +1293,7 @@ PrefabInstance:
     - target: {fileID: 6813981368972186340, guid: 0058b366f9d6d44a3ba35beb06b0174b,
         type: 3}
       propertyPath: m_IsActive
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 6814265275650057734, guid: 0058b366f9d6d44a3ba35beb06b0174b,
         type: 3}
@@ -2941,7 +2941,7 @@ PrefabInstance:
     - target: {fileID: 6813981368972186340, guid: 0058b366f9d6d44a3ba35beb06b0174b,
         type: 3}
       propertyPath: m_IsActive
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 6814265275650057734, guid: 0058b366f9d6d44a3ba35beb06b0174b,
         type: 3}
@@ -5324,6 +5324,11 @@ PrefabInstance:
       propertyPath: m_Name
       value: VertebrateLookingModel2
       objectReference: {fileID: 0}
+    - target: {fileID: 470312898131811728, guid: b7142c4829fbe344abb4b6139e5f9526,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 1742756557953898200, guid: b7142c4829fbe344abb4b6139e5f9526,
         type: 3}
       propertyPath: m_LocalPosition.x
@@ -5379,6 +5384,12 @@ PrefabInstance:
       propertyPath: terrainWithMaterial
       value: 
       objectReference: {fileID: 565038208}
+    - target: {fileID: 3457876413766865653, guid: b7142c4829fbe344abb4b6139e5f9526,
+        type: 3}
+      propertyPath: m_Model
+      value: 
+      objectReference: {fileID: 5022602860645237092, guid: 6683a09c550ccaa4292773159ff70589,
+        type: 3}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -6635,7 +6646,7 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Model
       value: 
-      objectReference: {fileID: 5022602860645237092, guid: 77adcfcae03c98f4c970fa23ce025def,
+      objectReference: {fileID: 5022602860645237092, guid: 6681fb5676117c84eb217392fdc63a16,
         type: 3}
     - target: {fileID: 3457876413766865653, guid: f99ddc4935bf9c24c9abdff213ddd149,
         type: 3}
@@ -11702,7 +11713,7 @@ PrefabInstance:
     - target: {fileID: 6813981368972186340, guid: 0058b366f9d6d44a3ba35beb06b0174b,
         type: 3}
       propertyPath: m_IsActive
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 6814265275650057734, guid: 0058b366f9d6d44a3ba35beb06b0174b,
         type: 3}
