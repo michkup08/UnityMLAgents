@@ -1,6 +1,6 @@
 # Uczenie ze wzmocnieniem na potrzeby generowania ruchu w animacji 3D (Praca Magisterska)
 
-
+https://github.com/user-attachments/assets/86bc7f3c-3798-45fc-901a-993305f5bee0
 
 ## ⚠️ Oświadczenie o autorstwie i źródłach
 Niniejsze repozytorium zawiera kod wykorzystany na potrzeby pracy magisterskiej. Projekt bazuje na oficjalnym środowisku Unity ML-Agents Toolkit. 
