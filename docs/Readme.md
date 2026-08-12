@@ -22,7 +22,7 @@ Poniżej wyszczególniono lokalizacje plików i folderów, które stanowią auto
 
 ### 1. Środowiska i skrypty w silniku Unity (C#)
 Autorskie obiekty środowisk, modele postaci, definicje przestrzeni obserwacji i akcji agenta oraz skrypty odpowiedzialne za inżynierię funkcji nagrody znajdują się w katalogu:
-* `Project/Assets/Examples/Vertebrate/Scenes/Enviroments/`
+* `MLAgentsProject/Assets/Examples/Vertebrate/Scenes/Enviroments/`
 
 ### 2. Implementacja algorytmów w Pythonie
 Kod backendu treningowego został rozszerzony o obsługę algorytmów DroQ oraz PPG. Do nowych folderów z plikami algorytmów należą:
