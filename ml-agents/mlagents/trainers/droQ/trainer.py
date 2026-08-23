@@ -11,7 +11,7 @@ from mlagents.trainers.optimizer.torch_optimizer import TorchOptimizer
 from mlagents.trainers.trainer.off_policy_trainer import OffPolicyTrainer
 from mlagents.trainers.policy.torch_policy import TorchPolicy
 from mlagents.trainers.policy.policy import Policy
-from mlagents.trainers.droQ.optimizer_torch import TorchDroQOptimizer, DroQSettings # <-- ZMIANA NAZWY
+from mlagents.trainers.droQ.optimizer_torch import TorchDroQOptimizer, DroQSettings
 from mlagents.trainers.trajectory import Trajectory, ObsUtil
 from mlagents.trainers.behavior_id_utils import BehaviorIdentifiers
 from mlagents.trainers.settings import TrainerSettings
@@ -52,8 +52,8 @@ class DroQTrainer(OffPolicyTrainer):
         )
 
         self.seed = seed
-        self.policy: TorchPolicy = None  # type: ignore
-        self.optimizer: TorchDroQOptimizer = None  # type: ignore
+        self.policy: TorchPolicy = None 
+        self.optimizer: TorchDroQOptimizer = None
         self.hyperparameters: DroQSettings = cast(
             DroQSettings, trainer_settings.hyperparameters
         )
@@ -118,9 +118,9 @@ class DroQTrainer(OffPolicyTrainer):
             self._update_end_episode_stats(agent_id, self.optimizer)
 
     def create_optimizer(self) -> TorchOptimizer:
-        return TorchDroQOptimizer(  # type: ignore
-            cast(TorchPolicy, self.policy), self.trainer_settings  # type: ignore
-        )  # type: ignore
+        return TorchDroQOptimizer( 
+            cast(TorchPolicy, self.policy), self.trainer_settings
+        ) 
 
     def create_policy(
         self, parsed_behavior_id: BehaviorIdentifiers, behavior_spec: BehaviorSpec

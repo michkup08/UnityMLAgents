@@ -36,7 +36,7 @@ public class VertebrateAgentNFExtendedLooking : Agent
     public Transform leg3Upper;
     public Transform leg3Lower;
 
-    public Transform segment0; // Założenie: to jest "Głowa" agenta
+    public Transform segment0;
     public Transform segment1;
     public Transform segment2;
 
@@ -74,7 +74,7 @@ public class VertebrateAgentNFExtendedLooking : Agent
 
     private void Start()
     {
-        terrainWithMaterial.height = 1; //zmniejszone żeby agent przez kamere widział cel
+        terrainWithMaterial.height = 1;
     }
 
     public override void Initialize()
@@ -132,13 +132,8 @@ public class VertebrateAgentNFExtendedLooking : Agent
 
     public override void CollectObservations(VectorSensor sensor)
     {
-        // [ZMIANA] USUNIĘTO wszystkie obserwacje, które zdradzały pozycję i kierunek celu!
-        // Agent musi teraz polegać wyłącznie na kamerze i swoim zmyśle równowagi.
-
         var avgVel = GetAvgVelocity();
 
-        // Zostawiamy jedynie informację o tym, jak szybko i w jakim kierunku agent aktualnie się porusza 
-        // (względem jego własnego "przodu")
         sensor.AddObservation(m_OrientationCube.transform.InverseTransformDirection(avgVel));
 
         RaycastHit hit;
@@ -233,8 +228,7 @@ public class VertebrateAgentNFExtendedLooking : Agent
             return;
         }
 
-        // [ZMIANA] System nagród obliczany "od zera" na podstawie prawdziwej wektorowej drogi do celu.
-        // Mimo że agent tego nie widzi w liczbach, system nagradza go, jeśli podąża w tę stronę na podstawie obrazu z kamery.
+        
         Vector3 dirToTarget = (m_Target.position - body.position).normalized;
         dirToTarget.y = 0;
         if (dirToTarget == Vector3.zero) dirToTarget = body.forward;
@@ -255,7 +249,6 @@ public class VertebrateAgentNFExtendedLooking : Agent
             AddReward(0.05f * mainGoalReward);
         }
 
-        // [ZMIANA] Ocena wygięcia kręgosłupa względem rzeczywistego kierunku do celu
         Transform[] spineSegments = { segment0, segment1, segment2 };
         float turnNeeded = Vector3.SignedAngle(body.forward, dirToTarget, Vector3.up);
         float signNeeded = Mathf.Sign(turnNeeded);
@@ -298,8 +291,7 @@ public class VertebrateAgentNFExtendedLooking : Agent
 
     void UpdateOrientationObjects()
     {
-        // [ZMIANA] OrientationCube stabilizuje teraz orientację własnego ciała agenta, a nie kierunek na cel.
-        // Dzięki temu lokalne obserwacje (raycasty, prędkość) nie będą zdradzać kierunku do celu.
+        
         Vector3 forwardPlane = body.forward;
         forwardPlane.y = 0;
         if (forwardPlane.sqrMagnitude > 0)
@@ -310,7 +302,6 @@ public class VertebrateAgentNFExtendedLooking : Agent
 
         if (m_DirectionIndicator)
         {
-            // Opcjonalnie: Strzałka nadal wizualnie pokazuje cel na ziemi
             Vector3 dirToTarget = m_Target.position - body.position;
             dirToTarget.y = 0;
             if (dirToTarget.sqrMagnitude > 0)

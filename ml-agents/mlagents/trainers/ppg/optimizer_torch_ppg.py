@@ -110,10 +110,7 @@ class TorchPPGOptimizer(TorchOptimizer):
 
     @timed
     def update_policy(self, batch: AgentBuffer, num_sequences: int) -> Dict[str, float]:
-        """
-        FAZA 1: Aktualizacja samej polityki z bonusem za entropię.
-        Brak wpływu na krytyka/funkcję wartości.
-        """
+
         decay_lr = self.decay_learning_rate.get_value(self.policy.get_current_step())
         decay_eps = self.decay_epsilon.get_value(self.policy.get_current_step())
         decay_bet = self.decay_beta.get_value(self.policy.get_current_step())
@@ -149,7 +146,6 @@ class TorchPPGOptimizer(TorchOptimizer):
         if len(value_memories) > 0:
             value_memories = torch.stack(value_memories).unsqueeze(0)
 
-        # puszczenie danych przez Aktora
         run_out = self.policy.actor.get_stats(
             current_obs,
             actions,
@@ -163,7 +159,7 @@ class TorchPPGOptimizer(TorchOptimizer):
         old_log_probs = ActionLogProbs.from_buffer(batch).flatten()
         loss_masks = ModelUtils.list_to_tensor(batch[BufferKey.MASKS], dtype=torch.bool)
 
-        # standardowy loss z PPO
+        # Standardowy loss z PPO (Clipping)
         policy_loss = ModelUtils.trust_region_policy_loss(
             ModelUtils.list_to_tensor(batch[BufferKey.ADVANTAGES]),
             log_probs,
@@ -204,9 +200,8 @@ class TorchPPGOptimizer(TorchOptimizer):
 
     def prepare_aux_phase(self) -> None:
         """
-        Tworzy głęboką kopię (zamraża) aktora z końca Fazy 1.
-        Posłuży on jako kotwica (Target Network) dla Behavioral Cloning w Fazie 2,
-        całkowicie omijając potrzebę manipulowania gigantycznym buforem.
+        Tworzy głęboką kopię (zamraża) aktora z końca fazy 1.
+        Posłuży on jako kotwica (Target Network) dla Behavioral Cloning w fazie 2
         """
         self.frozen_actor = copy.deepcopy(self.policy.actor)
         self.frozen_actor.eval()
@@ -214,7 +209,7 @@ class TorchPPGOptimizer(TorchOptimizer):
     @timed
     def update_auxiliary(self, batch: AgentBuffer, num_sequences: int) -> Dict[str, float]:
         """
-        FAZA 2: Faza pomocnicza (Auxiliary).
+        faza 2: faza pomocnicza (Auxiliary)
         Uczenie krytyka z równoczesną karą za zmianę oryginalnej polityki (KL Divergence).
         """
         decay_lr = self.decay_learning_rate.get_value(self.policy.get_current_step())
@@ -272,7 +267,7 @@ class TorchPPGOptimizer(TorchOptimizer):
         )
         log_probs = run_out["log_probs"].flatten()
         
-        # 2. "stare" prawdopodobieństwa z zamrożonego aktora
+        # "stare" prawdopodobieństwa z zamrożonego aktora
         with torch.no_grad():
             frozen_run_out = self.frozen_actor.get_stats(
                 current_obs,

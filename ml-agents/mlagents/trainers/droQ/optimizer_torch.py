@@ -31,7 +31,7 @@ class DroQSettings(OffPolicyHyperparamSettings):
     buffer_size: int = 50000
     buffer_init_steps: int = 0
     tau: float = 0.005
-    steps_per_update: float = 1  # W DroQ można to znacznie zwiększyć np. do 20
+    steps_per_update: float = 1  # W DroQ można to znacznie zwiększyć
     dropout_rate: float = 0.01   # to tylko dla droQ
     save_replay_buffer: bool = False
     init_entcoef: float = 1.0
@@ -193,8 +193,8 @@ class TorchDroQOptimizer(TorchOptimizer):
         self._critic.to(device)
         self.q_network.to(device)
 
-    # --- FUNKCJE STRATY POZOSTAJĄ BEZ ZMIAN W STOSUNKU DO SAC ---
-    def sac_q_loss(self, q1_out, q2_out, target_values, dones, rewards, loss_masks):
+    # funkcje straty pozostają bez zmian w stosunku do sac 
+    def droq_q_loss(self, q1_out, q2_out, target_values, dones, rewards, loss_masks):
         q1_losses, q2_losses = [], []
         for i, name in enumerate(q1_out.keys()):
             q1_stream, q2_stream = q1_out[name].squeeze(), q2_out[name].squeeze()
@@ -208,7 +208,7 @@ class TorchDroQOptimizer(TorchOptimizer):
             q2_losses.append(_q2_loss)
         return torch.mean(torch.stack(q1_losses)), torch.mean(torch.stack(q2_losses))
 
-    def sac_value_loss(self, log_probs, values, q1p_out, q2p_out, loss_masks):
+    def droq_value_loss(self, log_probs, values, q1p_out, q2p_out, loss_masks):
         min_policy_qs = {}
         with torch.no_grad():
             _cont_ent_coef = self._log_ent_coef.continuous.exp()
@@ -242,7 +242,7 @@ class TorchDroQOptimizer(TorchOptimizer):
                 value_losses.append(0.5 * ModelUtils.masked_mean(torch.nn.functional.mse_loss(values[name], v_backup.squeeze()), loss_masks))
         return torch.mean(torch.stack(value_losses))
 
-    def sac_policy_loss(self, log_probs, q1p_outs, loss_masks):
+    def droq_policy_loss(self, log_probs, q1p_outs, loss_masks):
         _cont_ent_coef, _disc_ent_coef = self._log_ent_coef.continuous.exp(), self._log_ent_coef.discrete.exp()
         mean_q1 = torch.mean(torch.stack(list(q1p_outs.values())), axis=0)
         batch_policy_loss = 0
@@ -263,7 +263,7 @@ class TorchDroQOptimizer(TorchOptimizer):
             
         return ModelUtils.masked_mean(batch_policy_loss, loss_masks)
 
-    def sac_entropy_loss(self, log_probs, loss_masks):
+    def droq_entropy_loss(self, log_probs, loss_masks):
         _cont_ent_coef, _disc_ent_coef = self._log_ent_coef.continuous, self._log_ent_coef.discrete
         entropy_loss = 0
         if self._action_spec.discrete_size > 0:
@@ -346,10 +346,10 @@ class TorchDroQOptimizer(TorchOptimizer):
         masks = ModelUtils.list_to_tensor(batch[BufferKey.MASKS], dtype=torch.bool)
         dones = ModelUtils.list_to_tensor(batch[BufferKey.DONE])
 
-        q1_loss, q2_loss = self.sac_q_loss(q1_stream, q2_stream, target_values, dones, rewards, masks)
-        value_loss = self.sac_value_loss(log_probs, value_estimates, q1p_out, q2p_out, masks)
-        policy_loss = self.sac_policy_loss(log_probs, q1p_out, masks)
-        entropy_loss = self.sac_entropy_loss(log_probs, masks)
+        q1_loss, q2_loss = self.droq_q_loss(q1_stream, q2_stream, target_values, dones, rewards, masks)
+        value_loss = self.droq_value_loss(log_probs, value_estimates, q1p_out, q2p_out, masks)
+        policy_loss = self.droq_policy_loss(log_probs, q1p_out, masks)
+        entropy_loss = self.droq_entropy_loss(log_probs, masks)
 
         total_value_loss = q1_loss + q2_loss + value_loss
 

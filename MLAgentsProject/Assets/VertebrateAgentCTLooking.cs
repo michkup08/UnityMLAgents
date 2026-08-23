@@ -5,29 +5,26 @@ using Unity.MLAgentsExamples;
 using Unity.MLAgents.Sensors;
 using Random = UnityEngine.Random;
 
-[RequireComponent(typeof(JointDriveController))] // Required to set joint forces
+[RequireComponent(typeof(JointDriveController))]
 public class VertebrateAgentCTLooking : Agent
 {
 
     [Header("Walk Speed")]
     [Range(0.1f, m_maxWalkingSpeed)]
     [SerializeField]
-    //The walking speed to try and achieve
     private float m_TargetWalkingSpeed = m_maxWalkingSpeed;
 
-    const float m_maxWalkingSpeed = 15; //The max walking speed
+    const float m_maxWalkingSpeed = 15;
 
-    //The current target walking speed. Clamped because a value of zero will cause NaNs
     public float TargetWalkingSpeed
     {
         get { return m_TargetWalkingSpeed; }
         set { m_TargetWalkingSpeed = Mathf.Clamp(value, .1f, m_maxWalkingSpeed); }
     }
 
-    //The direction an agent will walk during training.
     [Header("Target To Walk Towards")]
-    public Transform TargetPrefab; //Target prefab to use in Dynamic envs
-    private Transform m_Target; //Target the agent will walk towards during training.
+    public Transform TargetPrefab;
+    private Transform m_Target;
 
     [Header("Body Parts")][Space(10)] public Transform body;
     public Transform leg0Upper;
@@ -48,11 +45,8 @@ public class VertebrateAgentCTLooking : Agent
     public Transform segment2;
 
 
-    //This will be used as a stabilized model space reference point for observations
-    //Because ragdolls can move erratically during training, using a stabilized reference transform improves learning
     OrientationCubeController m_OrientationCube;
 
-    //The indicator graphic gameobject that points towards the target
     DirectionIndicator m_DirectionIndicator;
     JointDriveController m_JdController;
 
@@ -92,10 +86,6 @@ public class VertebrateAgentCTLooking : Agent
     [Tooltip("Kara za brak odpowiedniego zgięcia (bocznego) kręgosłupa podczas skręcania")]
     public float notBendingWhenTurningPenalty = -0.01f;
 
-    // Zmienna śledząca czas przebywania w zgięciu
-    //private float m_BentTimer = 0f;
-
-    //private float m_BellyTouchTimer = 0f;
     public float maxBellyTouchDuration = 2.0f;
 
     public bool threePartLegs = false;
@@ -106,15 +96,12 @@ public class VertebrateAgentCTLooking : Agent
     {
         terrainWithMaterial.height = 0;
         terrainWithMaterial.yOffset = 1;
-        //terrainWithMaterial.generateRandomTerrain();
 
-        SpawnTarget(TargetPrefab, transform.position + new Vector3(0f, 4f, 0f)); //spawn target
-
+        SpawnTarget(TargetPrefab, transform.position + new Vector3(0f, 4f, 0f));
         m_OrientationCube = GetComponentInChildren<OrientationCubeController>();
         m_DirectionIndicator = GetComponentInChildren<DirectionIndicator>();
         m_JdController = GetComponent<JointDriveController>();
 
-        //Setup each body part
         m_JdController.SetupBodyPart(body);
         m_JdController.SetupBodyPart(leg0Upper);
         m_JdController.SetupBodyPart(leg0Lower);
@@ -138,19 +125,11 @@ public class VertebrateAgentCTLooking : Agent
         m_JdController.SetupBodyPart(segment2);
     }
 
-    /// <summary>
-    /// Spawns a target prefab at pos
-    /// </summary>
-    /// <param name="prefab"></param>
-    /// <param name="pos"></param>
     void SpawnTarget(Transform prefab, Vector3 pos)
     {
         m_Target = Instantiate(prefab, pos, Quaternion.identity, transform.parent);
     }
 
-    /// <summary>
-    /// Loop over body parts and reset them to initial conditions.
-    /// </summary>
     public override void OnEpisodeBegin()
     {
         foreach (var bodyPart in m_JdController.bodyPartsDict.Values)
@@ -158,12 +137,10 @@ public class VertebrateAgentCTLooking : Agent
             bodyPart.Reset(bodyPart);
         }
 
-        //Random start rotation to help generalize
         body.rotation = Quaternion.Euler(0, Random.Range(0.0f, 360.0f), 0);
 
         UpdateOrientationObjects();
 
-        //Set our goal walking speed
         TargetWalkingSpeed = Random.Range(7f, m_maxWalkingSpeed);
 
         for (int i = 0; i < recentFootContacts.Length; i++)
@@ -175,13 +152,9 @@ public class VertebrateAgentCTLooking : Agent
         terrainWithMaterial.generateRandomTerrain();
     }
 
-    /// <summary>
-    /// Add relevant information on each body part to observations.
-    /// </summary>
     public void CollectObservationBodyPart(BodyPart bp, VectorSensor sensor)
     {
-        //GROUND CHECK
-        sensor.AddObservation(bp.groundContact.touchingGround); // Is this bp touching the ground
+        sensor.AddObservation(bp.groundContact.touchingGround);
 
         if (bp.rb.transform != body)
         {
@@ -189,9 +162,6 @@ public class VertebrateAgentCTLooking : Agent
         }
     }
 
-    /// <summary>
-    /// Loop over body parts to add them to observation.
-    /// </summary>
     public override void CollectObservations(VectorSensor sensor)
     {
         //ragdoll's avg vel
@@ -202,10 +172,8 @@ public class VertebrateAgentCTLooking : Agent
         sensor.AddObservation(body.up);
         sensor.AddObservation(body.forward);
 
-        //Add pos of target relative to orientation cube
         sensor.AddObservation(m_OrientationCube.transform.InverseTransformPoint(m_Target.transform.position));
 
-        // Dodano maskę warstw, żeby raycast środka ciała również ignorował własne collidery
         RaycastHit hit;
         float maxRaycastDist = 10;
         if (Physics.Raycast(body.position, Vector3.down, out hit, maxRaycastDist, groundLayer))
@@ -224,12 +192,10 @@ public class VertebrateAgentCTLooking : Agent
 
     public override void OnActionReceived(ActionBuffers actionBuffers)
     {
-        // The dictionary with all the body parts in it are in the jdController
         var bpDict = m_JdController.bodyPartsDict;
 
         var continuousActions = actionBuffers.ContinuousActions;
         var i = -1;
-        // Pick a new target joint rotation
         bpDict[leg0Upper].SetJointTargetRotation(continuousActions[++i], continuousActions[++i], 0);
         bpDict[leg1Upper].SetJointTargetRotation(continuousActions[++i], continuousActions[++i], 0);
         bpDict[leg2Upper].SetJointTargetRotation(continuousActions[++i], continuousActions[++i], 0);
@@ -247,13 +213,10 @@ public class VertebrateAgentCTLooking : Agent
             bpDict[leg3Last].SetJointTargetRotation(continuousActions[++i], 0, 0);
         }
 
-        // Po nogach:
         bpDict[segment0].SetJointTargetRotation(continuousActions[++i], continuousActions[++i], 0);
         bpDict[segment1].SetJointTargetRotation(continuousActions[++i], continuousActions[++i], 0);
         bpDict[segment2].SetJointTargetRotation(continuousActions[++i], continuousActions[++i], 0);
 
-
-        // Update joint strength
         bpDict[leg0Upper].SetJointStrength(continuousActions[++i]);
         bpDict[leg1Upper].SetJointStrength(continuousActions[++i]);
         bpDict[leg2Upper].SetJointStrength(continuousActions[++i]);
@@ -271,7 +234,6 @@ public class VertebrateAgentCTLooking : Agent
             bpDict[leg3Last].SetJointStrength(continuousActions[++i]);
         }
 
-        // Strength:
         bpDict[segment0].SetJointStrength(continuousActions[++i]);
         bpDict[segment1].SetJointStrength(continuousActions[++i]);
         bpDict[segment2].SetJointStrength(continuousActions[++i]);
@@ -282,8 +244,6 @@ public class VertebrateAgentCTLooking : Agent
     {
         UpdateOrientationObjects();
 
-        // If enabled the feet will light up green when the foot is grounded.
-        // This is just a visualization and isn't necessary for function
         if (useFootGroundedVisualization)
         {
             foot0.material = m_JdController.bodyPartsDict[leg0Lower].groundContact.touchingGround
@@ -302,37 +262,27 @@ public class VertebrateAgentCTLooking : Agent
 
         AddReward(0.001f);
 
-        //AddReward(matchSpeedReward * 0.1f);
-
-        //AddReward(lookAtTargetReward * 0.1f);
-
-        // --- POCZĄTEK FIXED UPDATE ---
-
-        // 1. Sprawdzenie stanu krytycznego (Upadek)
         float uprightDot = Vector3.Dot(body.up, Vector3.up);
 
 
 
         if (uprightDot < 0.1f)
         {
-            // Fatalny błąd - kończymy natychmiast
             AddReward(-1.0f);
             EndEpisode();
             return;
         }
 
-        // 2. Nagroda główna (Prędkość i podążanie za celem)
         var cubeForward = m_OrientationCube.transform.forward;
         var matchSpeedReward = GetMatchingVelocityReward(cubeForward * TargetWalkingSpeed, GetAvgVelocity());
-        // var lookAtTargetReward = Mathf.Pow((Vector3.Dot(cubeForward, body.forward) + 1) * .5F, 2); // do kwadratu zeby był bardziej restrykcyjny w kierunku
+        
         var lookAtTargetReward = Mathf.Pow(((Vector3.Dot(cubeForward, segment0.forward) + 1) * .25F) + ((Vector3.Dot(cubeForward, body.forward) + 1) * .25F), 2);
 
 
-        // Mnożymy przez główną wagę celów (np. 1.0, u Ciebie wcześniej było 25, co jest bardzo dużą wartością)
+        
         float mainGoalReward = matchSpeedReward * lookAtTargetReward;
         AddReward(mainGoalReward);
 
-        // 3. Nagroda za postawę (Belly Up) zamiast kary
         bool isBellyTouching = m_JdController.bodyPartsDict[body].groundContact.touchingGround ||
                                m_JdController.bodyPartsDict[segment0].groundContact.touchingGround ||
                                m_JdController.bodyPartsDict[segment1].groundContact.touchingGround ||
@@ -343,7 +293,6 @@ public class VertebrateAgentCTLooking : Agent
             AddReward(0.05f * mainGoalReward);
         }
 
-        // 4. Nagroda za prawidłowe zgięcie kręgosłupa
         Transform[] spineSegments = { segment0, segment1, segment2 };
         float turnNeeded = Vector3.SignedAngle(body.forward, cubeForward, Vector3.up);
         float signNeeded = Mathf.Sign(turnNeeded);
@@ -357,23 +306,20 @@ public class VertebrateAgentCTLooking : Agent
 
             if (isTurning)
             {
-                // Skręcamy: Nagradzamy, jeśli segment wygina się w stronę skrętu
                 if (Mathf.Sign(segAngle) == signNeeded && Mathf.Abs(segAngle) >= 1.5f && Mathf.Abs(segAngle) < bentAngleThreshold)
                 {
-                    spineAlignmentReward += 0.1f; // Mała nagroda za ładny łuk
+                    spineAlignmentReward += 0.1f;
                 }
             }
             else
             {
-                // Idziemy prosto: Nagradzamy, jeśli segment jest w miarę wyprostowany
                 if (Mathf.Abs(segAngle) < 5.0f)
                 {
-                    spineAlignmentReward += 0.15f; // Mała nagroda za prosty kręgosłup
+                    spineAlignmentReward += 0.15f;
                 }
             }
         }
 
-        // Ponownie zabezpieczamy się przed "farmieniem" - nagroda za kręgosłup ma sens tylko podczas ruchu
         AddReward(spineAlignmentReward * mainGoalReward);
 
         Transform[] upperLegSegments = { leg0Upper, leg1Upper, leg2Upper, leg3Upper };
@@ -394,22 +340,16 @@ public class VertebrateAgentCTLooking : Agent
 
         foreach (var seg in allBodySegments)
         {
-            // dotUp wynosi 1.0 gdy segment leży idealnie płasko na ziemi
             float dotUp = Vector3.Dot(seg.up, Vector3.up);
 
-            // Zakładamy próg tolerancji (np. 0.85 to lekki przechył). 
-            // Nagradzamy tylko, jeśli segment jest w miarę poziomo.
             if (dotUp > 0.5f)
             {
-                // Skalujemy wynik: dla dotUp = 0.5 daje 0, dla dotUp = 1.0 daje 1.0
                 float flatnessMultiplier = Mathf.InverseLerp(0.5f, 1.0f, dotUp);
 
-                // Dodajemy małą cząstkową nagrodę za ten konkretny segment
                 flatPostureReward += flatnessMultiplier * 0.1f;
             }
         }
 
-        // Przyznajemy nagrodę tylko w trakcie poprawnego realizowania głównego celu (ruchu)
         AddReward(flatPostureReward * mainGoalReward);
 
         Transform[] feetSegments = { leg0Lower, leg1Lower, leg2Lower, leg3Lower };
@@ -419,155 +359,26 @@ public class VertebrateAgentCTLooking : Agent
             feetSegments = new Transform[] { leg0Last, leg1Last, leg2Last, leg3Last };
         }
 
-        // Parametr decydujący o "pamięci" (0.02f oznacza, że bierze pod uwagę ok. ostatnie 50-100 klatek)
         float emaAlpha = 0.02f;
 
         for (int i = 0; i < feetSegments.Length; i++)
         {
-            // Czy ta stopa w tej konkretnej klatce dotyka ziemi? (1 = tak, 0 = nie)
+            
             float isTouching = m_JdController.bodyPartsDict[feetSegments[i]].groundContact.touchingGround ? 1f : 0f;
 
-            // Płynnie aktualizujemy historię kontaktu dla tej stopy
             recentFootContacts[i] = Mathf.Lerp(recentFootContacts[i], isTouching, emaAlpha);
         }
 
-        // Szukamy stopy, która dotykała ziemi najczęściej i najrzadziej w ostatnim czasie
         float maxContact = Mathf.Max(recentFootContacts[0], recentFootContacts[1], recentFootContacts[2], recentFootContacts[3]);
         float minContact = Mathf.Min(recentFootContacts[0], recentFootContacts[1], recentFootContacts[2], recentFootContacts[3]);
 
-        // Różnica w czasie kontaktu (0.0 to idealna symetria, wyższa wartość to utykanie/asymetria)
         float contactDifference = maxContact - minContact;
 
-        // Sprawdzamy, czy agent w ogóle opiera się na nogach (żeby nie nagradzać latania w powietrzu)
-
-        // Nagroda: odwracamy różnicę. Idealna symetria daje 1.0.
         float symmetryReward = 1f - contactDifference;
 
-        // Mnożymy x0.1 (lub inną wagę) i uzależniamy od mainGoalReward, by wymuszać to tylko w trakcie ruchu do celu
         AddReward(symmetryReward * 0.1f * mainGoalReward);
-
-
-
-        ///////////////////////nizej jest system kar, poobujemy go zastąpić systemem nagród
-
-        // 1. Kara za dotykanie brzuchem (lub segmentami kręgosłupa) ziemi
-        //if (m_JdController.bodyPartsDict[body].groundContact.touchingGround ||
-        //    m_JdController.bodyPartsDict[segment0].groundContact.touchingGround ||
-        //    m_JdController.bodyPartsDict[segment1].groundContact.touchingGround ||
-        //    m_JdController.bodyPartsDict[segment2].groundContact.touchingGround)
-        //{
-        //    AddReward(bellyTouchPenalty);
-        //}
-
-        //// 2. Kara za użycie energii (suma kwadratów znormalizowanej siły wszystkich stawów)
-        //float energyUsed = 0f;
-        //foreach (var bp in m_JdController.bodyPartsList)
-        //{
-        //    if (bp.rb.transform != body) // Główne ciało nie ma napędu
-        //    {
-        //        float normalizedStrength = bp.currentStrength / m_JdController.maxJointForceLimit;
-        //        energyUsed += normalizedStrength * normalizedStrength;
-        //    }
-        //}
-        //AddReward(energyPenaltyWeight * energyUsed);
-
-        //// --- Analiza zgięcia kręgosłupa na płaszczyźnie poziomej (do kar 3 i 4) ---
-        //// Używamy Vector3.SignedAngle wzdłuż osi Y, aby określić czy zgięcie jest w lewo/prawo i jak silne.
-        //Transform[] spineSegments = { segment0, segment1, segment2 };
-        //bool isOverBent = false;
-
-        //// 3. Sprawdzamy, czy KTÓRYKOLWIEK segment jest wygięty za bardzo
-        //foreach (var seg in spineSegments)
-        //{
-        //    float segAngle = Vector3.SignedAngle(body.forward, seg.forward, Vector3.up);
-        //    if (Mathf.Abs(segAngle) > bentAngleThreshold)
-        //    {
-        //        isOverBent = true;
-        //        break; // Wystarczy, że jeden jest wygięty za mocno
-        //    }
-        //}
-
-        //// Obsługa timera dla kary 3
-        //if (isOverBent)
-        //{
-        //    m_BentTimer += Time.fixedDeltaTime;
-        //    if (m_BentTimer > maxBentDuration)
-        //    {
-        //        AddReward(overBentPenalty);
-        //    }
-        //}
-        //else
-        //{
-        //    // Resetujemy timer, jeśli agent wyrównał wszystkie segmenty
-        //    m_BentTimer = 0f;
-        //}
-
-        //// 4. Kara za niezgięcie kręgosłupa w odpowiednią stronę przy skręcaniu
-        //float turnNeeded = Vector3.SignedAngle(body.forward, cubeForward, Vector3.up);
-
-        //if (Mathf.Abs(turnNeeded) > turnNeededThreshold)
-        //{
-        //    float signNeeded = Mathf.Sign(turnNeeded);
-
-        //    // Zamiast karać raz za całość, rozkładamy karę proporcjonalnie na każdy segment,
-        //    // który "nie współpracuje" ze skrętem. Daje to łagodniejszy gradient uczenia.
-        //    float penaltyPerSegment = notBendingWhenTurningPenalty / spineSegments.Length;
-
-        //    foreach (var seg in spineSegments)
-        //    {
-        //        float segAngle = Vector3.SignedAngle(body.forward, seg.forward, Vector3.up);
-
-        //        // Zmniejszyłem wymóg z 5f do 1.5f, ponieważ teraz wymagamy zgięcia od KAŻDEGO z 3 segmentów z osobna
-        //        // (1.5 * 3 to w sumie ponad 4.5 stopnia płynnego łuku)
-        //        if (Mathf.Sign(segAngle) != signNeeded || Mathf.Abs(segAngle) < 1.5f)
-        //        {
-        //            AddReward(penaltyPerSegment);
-        //        }
-        //    }
-        //}
-
-        //float uprightDot = Vector3.Dot(body.up, Vector3.up);
-
-        //// uprightDot == 1 to idealny pion, 0 to leżenie na boku, -1 to do góry nogami.
-        //// Jeśli uprightDot spadnie poniżej zera (agent leży na plecach) lub jest bliski zeru (leży na boku).
-        //if (uprightDot < 0.1f)
-        //{
-        //    // Agent się przewrócił. To jest stan, z którego prawdopodobnie nie wstanie.
-        //    AddReward(-1.0f); // Bolesna kara za wywrotkę
-        //    EndEpisode();     // Przerywamy epizod
-        //    return;
-        //}
-
-        //bool isBellyTouching = m_JdController.bodyPartsDict[body].groundContact.touchingGround ||
-        //               m_JdController.bodyPartsDict[segment0].groundContact.touchingGround ||
-        //               m_JdController.bodyPartsDict[segment1].groundContact.touchingGround ||
-        //               m_JdController.bodyPartsDict[segment2].groundContact.touchingGround;
-
-        //if (isBellyTouching)
-        //{
-        //    // Mała kara za samo otarcie (jak dotychczas)
-        //    AddReward(bellyTouchPenalty);
-
-        //    // Zliczamy czas "czołgania się" lub leżenia
-        //    m_BellyTouchTimer += Time.fixedDeltaTime;
-
-        //    // Jeśli leży/czołga się zbyt długo (np. > 2 sekundy), uznajemy to za porażkę
-        //    if (m_BellyTouchTimer > maxBellyTouchDuration)
-        //    {
-        //        AddReward(-1.0f); // Duża kara
-        //        EndEpisode();     // Zakończenie epizodu - to wybije go ze strategii "leżenia w kulce"
-        //        return;
-        //    }
-        //}
-        //else
-        //{
-        //    m_BellyTouchTimer = 0f; // Agent wstał, resetujemy timer
-        //}
     }
 
-    /// <summary>
-    /// Update OrientationCube and DirectionIndicator
-    /// </summary>
     void UpdateOrientationObjects()
     {
         m_OrientationCube.UpdateOrientation(segment0, m_Target);
@@ -577,50 +388,20 @@ public class VertebrateAgentCTLooking : Agent
         }
     }
 
-    /// <summary>
-    ///Returns the average velocity of all of the body parts
-    ///Using the velocity of the body only has shown to result in more erratic movement from the limbs
-    ///Using the average helps prevent this erratic movement
-    /// </summary>
     Vector3 GetAvgVelocity()
     {
-        //Vector3 velSum = Vector3.zero;
-        //Vector3 avgVel = Vector3.zero;
-
-        ////ALL RBS
-        //int numOfRb = 0;
-        //foreach (var item in m_JdController.bodyPartsList)
-        //{
-        //    numOfRb++;
-        //    velSum += item.rb.linearVelocity;
-        //}
-
-        //avgVel = velSum / numOfRb;
-        //return avgVel;
-
-        // Chcemy prędkości w konkretnym kierunku (dot product)
         Vector3 vel = m_JdController.bodyPartsDict[body].rb.linearVelocity;
         vel.y = 0;
         return vel;
 
     }
 
-    /// <summary>
-    /// Normalized value of the difference in actual speed vs goal walking speed.
-    /// </summary>
     public float GetMatchingVelocityReward(Vector3 velocityGoal, Vector3 actualVelocity)
     {
-        //distance between our actual velocity and goal velocity
         var velDeltaMagnitude = Mathf.Clamp(Vector3.Distance(actualVelocity, velocityGoal), 0, TargetWalkingSpeed);
-
-        //return the value on a declining sigmoid shaped curve that decays from 1 to 0
-        //This reward will approach 1 if it matches perfectly and approach zero as it deviates
         return Mathf.Pow(1 - Mathf.Pow(velDeltaMagnitude / TargetWalkingSpeed, 2), 2);
     }
 
-    /// <summary>
-    /// Agent touched the target
-    /// </summary>
     public void TouchedTarget()
     {
         AddReward(1f);

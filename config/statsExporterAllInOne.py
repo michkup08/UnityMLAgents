@@ -4,11 +4,10 @@ import argparse
 import pandas as pd
 from tensorboard.backend.event_processing.event_accumulator import EventAccumulator
 
-BASE_DIR = r'D:\ml-agents'
-OUTPUT_DIR = r'D:\ml-agents\Wykresy_Analiza'
+BASE_DIR = r'D:\UnityMLAgentsResults\ml-agents'
+OUTPUT_DIR = r'D:\UnityMLAgentsResults\ml-agents\Wykresy_Analiza'
 OUTPUT_CSV = os.path.join(OUTPUT_DIR, 'all_training_data.csv')
 
-# DODANO: Policy/Entropy
 METRICS_TO_EXTRACT = [
     'Environment/Cumulative Reward',
     'Environment/Episode Length',

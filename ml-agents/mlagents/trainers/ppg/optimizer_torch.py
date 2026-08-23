@@ -30,10 +30,10 @@ class PPGSettings(OnPolicyHyperparamSettings):
     beta_schedule: ScheduleType = ScheduleType.LINEAR
     epsilon_schedule: ScheduleType = ScheduleType.LINEAR
 
-    num_policy_updates_per_aux: int = 16  # Co ile aktualizacji polityki odpalamy fazę Aux
-    aux_epochs: int = 6                   # Ile epok w fazie Aux
-    kl_penalty_coef: float = 1.0          # Współczynnik kary za zmianę polityki w fazie Aux (beta_clone)
-    shared_critic: bool = True            # W PPG Krytyk i Aktor BARDZO często współdzielą wagi w fazie Aux
+    num_policy_updates_per_aux: int = 16  # co ile aktualizacji polityki odpalamy fazę Aux
+    aux_epochs: int = 6 # ile epok w fazie aux
+    kl_penalty_coef: float = 1.0 # kara za zmianę polityki w fazie aux (beta_clone)
+    shared_critic: bool = False
 
 
 class TorchPPGOptimizer(TorchOptimizer):
@@ -78,13 +78,10 @@ class TorchPPGOptimizer(TorchOptimizer):
             self.trainer_settings.max_steps,
         )
 
-        # W PPG zazwyczaj mamy osobne optymalizatory dla faz
-        # Parametry aktora
         self.actor_optimizer = torch.optim.Adam(
             self.policy.actor.parameters(), lr=self.trainer_settings.hyperparameters.learning_rate
         )
         
-        # Parametry dla fazy pomocniczej (Zawsze Aktor + opcjonalnie Krytyk, jeśli nie jest współdzielony)
         aux_params = list(self.policy.actor.parameters())
         if not self.hyperparameters.shared_critic:
             aux_params += list(self._critic.parameters())
@@ -105,10 +102,7 @@ class TorchPPGOptimizer(TorchOptimizer):
 
     @timed
     def update_policy(self, batch: AgentBuffer, num_sequences: int) -> Dict[str, float]:
-        """
-        FAZA 1: Aktualizacja samej polityki z bonusem za entropię.
-        Brak wpływu na krytyka/funkcję wartości.
-        """
+
         decay_lr = self.decay_learning_rate.get_value(self.policy.get_current_step())
         decay_eps = self.decay_epsilon.get_value(self.policy.get_current_step())
         decay_bet = self.decay_beta.get_value(self.policy.get_current_step())
@@ -127,7 +121,6 @@ class TorchPPGOptimizer(TorchOptimizer):
         if len(memories) > 0:
             memories = torch.stack(memories).unsqueeze(0)
 
-        # Puszczenie danych przez Aktora
         run_out = self.policy.actor.get_stats(
             current_obs,
             actions,
@@ -150,7 +143,6 @@ class TorchPPGOptimizer(TorchOptimizer):
             decay_eps,
         )
         
-        # Odrzucamy 0.5 * value_loss - optymalizujemy TYLKO aktora
         loss = policy_loss - decay_bet * ModelUtils.masked_mean(entropy, loss_masks)
 
         ModelUtils.update_learning_rate(self.actor_optimizer, decay_lr)
@@ -168,7 +160,7 @@ class TorchPPGOptimizer(TorchOptimizer):
     @timed
     def update_auxiliary(self, batch: AgentBuffer, num_sequences: int) -> Dict[str, float]:
         """
-        FAZA 2: Faza pomocnicza (Auxiliary).
+        faza 2: faza pomocnicza (Auxiliary)
         Uczenie krytyka z równoczesną karą za zmianę oryginalnej polityki (KL Divergence).
         """
         decay_lr = self.decay_learning_rate.get_value(self.policy.get_current_step())
@@ -191,7 +183,7 @@ class TorchPPGOptimizer(TorchOptimizer):
         act_masks = ModelUtils.list_to_tensor(batch[BufferKey.ACTION_MASK])
         actions = AgentAction.from_buffer(batch)
 
-        # Pamięć dla aktora
+        # pamięć dla aktora
         memories = [
             ModelUtils.list_to_tensor(batch[BufferKey.MEMORY][i])
             for i in range(0, len(batch[BufferKey.MEMORY]), self.policy.sequence_length)
@@ -199,7 +191,7 @@ class TorchPPGOptimizer(TorchOptimizer):
         if len(memories) > 0:
             memories = torch.stack(memories).unsqueeze(0)
 
-        # Pamięć dla krytyka
+        # pamięć dla krytyka
         value_memories = [
             ModelUtils.list_to_tensor(batch[BufferKey.CRITIC_MEMORY][i])
             for i in range(0, len(batch[BufferKey.CRITIC_MEMORY]), self.policy.sequence_length)
@@ -207,7 +199,6 @@ class TorchPPGOptimizer(TorchOptimizer):
         if len(value_memories) > 0:
             value_memories = torch.stack(value_memories).unsqueeze(0)
 
-        # Musimy uzyskać nowe log_probs, aby porównać je ze starymi w ramach Behavioral Cloning
         run_out = self.policy.actor.get_stats(
             current_obs,
             actions,
@@ -218,7 +209,7 @@ class TorchPPGOptimizer(TorchOptimizer):
         log_probs = run_out["log_probs"].flatten()
         old_log_probs = ActionLogProbs.from_buffer(batch).flatten()
         
-        # Wartości krytyka
+        # wartości krytyka
         values, _ = self.critic.critic_pass(
             current_obs,
             memories=value_memories,
@@ -226,18 +217,17 @@ class TorchPPGOptimizer(TorchOptimizer):
         )
         loss_masks = ModelUtils.list_to_tensor(batch[BufferKey.MASKS], dtype=torch.bool)
 
-        # Obliczanie Value Loss
+        # obliczanie value loss
         value_loss = ModelUtils.trust_region_value_loss(
             values, old_values, returns, decay_eps, loss_masks
         )
 
-        # Aproksymacja dywergencji KL dla bezpieczeństwa polityki
-        # ratio = exp(nowe_prawdopodobienstwo - stare_prawdopodobienstwo)
+        # aproksymacja dywergencji KL dla bezpieczeństwa polityki
         ratio = torch.exp(log_probs - old_log_probs)
         # kl = (ratio - 1) - log(ratio)
         kl_div = torch.mean(ratio - 1.0 - torch.log(ratio + 1e-8))
 
-        # Łączony błąd fazy pomocniczej
+        # łączony błąd fazy aux
         aux_loss = value_loss + (self.hyperparameters.kl_penalty_coef * kl_div)
 
         ModelUtils.update_learning_rate(self.aux_optimizer, decay_lr)
@@ -252,8 +242,6 @@ class TorchPPGOptimizer(TorchOptimizer):
             "Policy/Learning Rate": decay_lr,
         }
 
-
-    # TODO move module update into TorchOptimizer for reward_provider
     def get_modules(self):
         modules = {
             "Optimizer:actor_optimizer": self.actor_optimizer,

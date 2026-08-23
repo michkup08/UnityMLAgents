@@ -16,7 +16,6 @@ from mlagents.trainers.settings import TrainerSettings
 
 from mlagents.trainers.torch_entities.networks import SimpleActor, SharedActorCritic
 
-# Zaimportowanie naszego optymalizatora PPG i ustawień
 from mlagents.trainers.ppg.optimizer_torch_ppg import TorchPPGOptimizer, PPGSettings
 
 logger = get_logger(__name__)
@@ -51,16 +50,13 @@ class PPGTrainer(OnPolicyTrainer):
         )
         self.seed = seed
         self.shared_critic = self.hyperparameters.shared_critic
-        self.policy: TorchPolicy = None  # type: ignore
+        self.policy: TorchPolicy = None 
 
-        # Bufor pomocniczy (Auxiliary Buffer), który zbiera dane z kilku faz polityki
+        # Bufor pomocniczy, który zbiera dane z faz polityki
         self.aux_buffer = AgentBuffer()
-        # Licznik aktualizacji polityki, potrzebny do odpalenia fazy pomocniczej
+        # Licznik aktualizacji polityki, potrzebny do odpalenia fazy pomocniczej co którąś liczbę aktualizacji polityki
         self.policy_update_count = 0
 
-    # ==============================================================================
-    # --- PRZYWRÓCONA FUNKCJA (Wymagana przez architekturę ML-Agents) ---
-    # ==============================================================================
     def _process_trajectory(self, trajectory: Trajectory) -> None:
         """
         Takes a trajectory and processes it, putting it into the update buffer.
@@ -153,15 +149,12 @@ class PPGTrainer(OnPolicyTrainer):
         """
         return False
 
-    # ==============================================================================
-    # --- LOGIKA PPG: NADPISANA METODA ADVANCE() ---
-    # ==============================================================================
+    # ppg nadpisuje metode advance
     def advance(self) -> None:
         """
         Nadpisuje domyślne zachowanie OnPolicyTrainer.
-        Steruje dwiema fazami:
-        1. Faza Polityki (gromadzi też dane do aux_buffer).
-        2. Faza Pomocnicza (odpalana co N aktualizacji polityki).
+        faza polityki (gromadzi też dane do aux_buffer).
+        faza pomocnicza (odpalana co N aktualizacji polityki).
         """
         # Odpytanie bazowego Trainera (uruchamia _process_trajectory i odbiera dane z Unity)
         super().advance()
@@ -172,17 +165,17 @@ class PPGTrainer(OnPolicyTrainer):
         batch_size = self.trainer_settings.hyperparameters.batch_size
         seq_len = self.policy.sequence_length
 
-        # Sprawdź, czy update_buffer ma wystarczająco danych na Fazę 1
+        # Sprawdzenie, czy update_buffer ma wystarczająco danych na Fazę 1
         if self.update_buffer.num_experiences >= self.trainer_settings.hyperparameters.buffer_size:
             
             buffer_len = self.update_buffer.num_experiences
 
-            # FAZA 1: Trenowanie Polityki (Aktora)
+            # faza 1 - trenowanie polityki (Aktora)
             for _ in range(self.hyperparameters.num_epoch):
-                # Tasowanie danych (ważne dla stabilności)
+                # tasowanie danych (ważne dla stabilności)
                 self.update_buffer.shuffle(sequence_length=seq_len)
                 
-                # Ręczne cięcie na mini-batche (zgodnie z API ML-Agents)
+                # cięcie na mini-batche (zgodnie z API ML-Agents)
                 for l in range(buffer_len // batch_size):
                     start = l * batch_size
                     end = (l + 1) * batch_size
@@ -193,13 +186,13 @@ class PPGTrainer(OnPolicyTrainer):
                     for stat_name, value in update_stats.items():
                         self._stats_reporter.add_stat(stat_name, value)
             
-            # Kopiowanie danych z Fazy 1 do Bufora Pomocniczego
+            # Kopiowanie danych z fazy 1 do bufora pomocniczego
             for key, field in self.update_buffer.items():
                 self.aux_buffer[key].extend(field)
-            self.update_buffer = AgentBuffer() # Czyścimy standardowy bufor
+            self.update_buffer = AgentBuffer() # czyszczenie standardowego bufora
             self.policy_update_count += 1
 
-            # FAZA 2: Sprawdź, czy nadszedł czas na Fazę Pomocniczą
+            # faza 2 - sprawdzenie, czy nadszedł czas na fazę pomocniczą
             if self.policy_update_count >= self.hyperparameters.num_policy_updates_per_aux:
                 logger.info(f"Rozpoczynam Fazę Aux na {self.aux_buffer.num_experiences} próbkach...")
                 
@@ -218,7 +211,7 @@ class PPGTrainer(OnPolicyTrainer):
                         for stat_name, value in aux_stats.items():
                             self._stats_reporter.add_stat(stat_name, value)
                 
-                # Zakończenie Fazy 2: Wyczyszczenie bufora i licznika
+                # Zakończenie fazy 2 - wyczyszczenie bufora i licznika
                 self.aux_buffer = AgentBuffer()
                 self.policy_update_count = 0
 

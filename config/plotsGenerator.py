@@ -5,8 +5,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
 
-INPUT_CSV = r'D:\ml-agents\Wykresy_Analiza\all_training_data.csv'
-BASE_OUTPUT_DIR = r'D:\ml-agents\Wykresy_Analiza'
+INPUT_CSV = r'D:\UnityMLAgentsResults\ml-agents\Wykresy_Analiza\all_training_data.csv'
+BASE_OUTPUT_DIR = r'D:\UnityMLAgentsResults\ml-agents\Wykresy_Analiza'
 
 MAX_STEPS = 10000000     
 STEP_ROUNDING = 10000    
@@ -17,7 +17,9 @@ DIRS = {
     'time': os.path.join(BASE_OUTPUT_DIR, '2_Efektywnosc_Czasowa'),
     'len': os.path.join(BASE_OUTPUT_DIR, '3_Dlugosc_Epizodu'),
     'ent': os.path.join(BASE_OUTPUT_DIR, '4_Entropia_Polityki'),
-    'runs': os.path.join(BASE_OUTPUT_DIR, '5_Poszczegolne_Treningi_Nagroda') # DODANO NOWY FOLDER
+    'runs': os.path.join(BASE_OUTPUT_DIR, '5_Poszczegolne_Treningi_Nagroda'),
+    'runs_len': os.path.join(BASE_OUTPUT_DIR, '6_Poszczegolne_Treningi_Dlugosc'),
+    'runs_ent': os.path.join(BASE_OUTPUT_DIR, '7_Poszczegolne_Treningi_Entropia')
 }
 
 def setup_directories(suffix=""):
@@ -66,6 +68,7 @@ def generate_plots(filter_keyword):
     df['Relative_Time_Hrs'] = (df['Wall_Time'] - min_times) / 3600.0
     df['Step_Binned'] = (df['Step'] // STEP_ROUNDING) * STEP_ROUNDING
 
+    # --- NAGRODA ---
     print("Generowanie wykresów zagregowanych (Nagroda)...")
     df_reward = df[df['Tag'] == 'Environment/Cumulative Reward'].copy()
     if not df_reward.empty:
@@ -74,7 +77,6 @@ def generate_plots(filter_keyword):
 
         plt.figure(figsize=(12, 7))
         sns.lineplot(data=df_reward, x='Step_Binned', y='Value_Smoothed', hue='Algorithm', errorbar=('ci', 95), estimator='median', linewidth=2.5)
-        plt.title(f"Średnia Nagroda (95% CI) - Filtr: {filter_keyword}", fontsize=16, fontweight='bold')
         plt.xlabel("Liczba Kroków", fontsize=12)
         plt.ylabel("Skumulowana Nagroda", fontsize=12)
         plt.xlim(0, MAX_STEPS)
@@ -83,7 +85,7 @@ def generate_plots(filter_keyword):
         plt.savefig(os.path.join(out_dirs['agg'], f"Porownanie_Nagrody_{filter_keyword}.png"), dpi=300)
         plt.close()
 
-    print("Generowanie wykresów dla poszczególnych treningów...")
+    print("Generowanie wykresów dla poszczególnych treningów (Nagroda)...")
     if not df_reward.empty:
         for algo in algos_in_analysis:
             df_algo = df_reward[df_reward['Algorithm'] == algo]
@@ -97,7 +99,6 @@ def generate_plots(filter_keyword):
                 palette='tab10',
                 linewidth=2
             )
-            plt.title(f"Cumulative Reward - {algo} (Do 10 mln kroków)", fontsize=14, fontweight='bold')
             plt.xlabel("Liczba Kroków (Steps)", fontsize=12)
             plt.ylabel("Nagroda (Cumulative Reward)", fontsize=12)
             plt.xlim(0, MAX_STEPS)
@@ -106,6 +107,7 @@ def generate_plots(filter_keyword):
             plt.savefig(os.path.join(out_dirs['runs'], f"{algo}_runs_reward_10m.png"), dpi=300)
             plt.close()
 
+    # --- CZAS NAUKI ---
     print("Generowanie wykresów czasu nauki...")
     df_time = df[df['Tag'] == 'Environment/Cumulative Reward'].copy()
     if not df_time.empty:
@@ -116,7 +118,6 @@ def generate_plots(filter_keyword):
 
         plt.figure(figsize=(12, 7))
         sns.lineplot(data=df_time, x='Time_Binned', y='Value_Smoothed', hue='Algorithm', errorbar=('ci', 95), estimator='median', linewidth=2.5)
-        plt.title(f"Efektywność Obliczeniowa (Nagroda vs Godziny) - Filtr: {filter_keyword}", fontsize=16, fontweight='bold')
         plt.xlabel("Czas Nauki (Godziny)", fontsize=12)
         plt.ylabel("Skumulowana Nagroda", fontsize=12)
         plt.legend(title="Algorytm")
@@ -124,6 +125,7 @@ def generate_plots(filter_keyword):
         plt.savefig(os.path.join(out_dirs['time'], f"Czas_Nauki_{filter_keyword}.png"), dpi=300)
         plt.close()
 
+    # --- DŁUGOŚĆ EPIZODU ---
     print("Generowanie wykresów długości epizodu...")
     df_len = df[df['Tag'] == 'Environment/Episode Length'].copy()
     if not df_len.empty:
@@ -132,7 +134,6 @@ def generate_plots(filter_keyword):
 
         plt.figure(figsize=(12, 7))
         sns.lineplot(data=df_len, x='Step_Binned', y='Value_Smoothed', hue='Algorithm', errorbar=('ci', 95), estimator='median', linewidth=2.5)
-        plt.title(f"Długość Epizodu - Filtr: {filter_keyword}", fontsize=16, fontweight='bold')
         plt.xlabel("Liczba Kroków", fontsize=12)
         plt.ylabel("Długość Epizodu", fontsize=12)
         plt.xlim(0, MAX_STEPS)
@@ -141,6 +142,29 @@ def generate_plots(filter_keyword):
         plt.savefig(os.path.join(out_dirs['len'], f"Dlugosc_Epizodu_{filter_keyword}.png"), dpi=300)
         plt.close()
 
+    print("Generowanie wykresów dla poszczególnych treningów (Długość Epizodu)...")
+    if not df_len.empty:
+        for algo in algos_in_analysis:
+            df_algo = df_len[df_len['Algorithm'] == algo]
+            
+            plt.figure(figsize=(10, 6))
+            sns.lineplot(
+                data=df_algo, 
+                x='Step_Binned', 
+                y='Value_Smoothed', 
+                hue='Run', 
+                palette='tab10',
+                linewidth=2
+            )
+            plt.xlabel("Liczba Kroków (Steps)", fontsize=12)
+            plt.ylabel("Długość Epizodu", fontsize=12)
+            plt.xlim(0, MAX_STEPS)
+            plt.legend(title="Numer treningu (Run)")
+            plt.tight_layout()
+            plt.savefig(os.path.join(out_dirs['runs_len'], f"{algo}_runs_length_10m.png"), dpi=300)
+            plt.close()
+
+    # --- ENTROPIA ---
     print("Generowanie wykresów entropii...")
     df_ent = df[df['Tag'] == 'Policy/Entropy'].copy()
     if df_ent.empty:
@@ -151,7 +175,6 @@ def generate_plots(filter_keyword):
 
         plt.figure(figsize=(12, 7))
         sns.lineplot(data=df_ent, x='Step_Binned', y='Value_Smoothed', hue='Algorithm', errorbar=('ci', 95), estimator='mean', linewidth=2)
-        plt.title(f"Spadek Entropii - Filtr: {filter_keyword}", fontsize=16, fontweight='bold')
         plt.xlabel("Liczba Kroków", fontsize=12)
         plt.ylabel("Wartość Entropii", fontsize=12)
         plt.xlim(0, MAX_STEPS)
@@ -159,6 +182,28 @@ def generate_plots(filter_keyword):
         plt.tight_layout()
         plt.savefig(os.path.join(out_dirs['ent'], f"Entropia_{filter_keyword}.png"), dpi=300)
         plt.close()
+
+    print("Generowanie wykresów dla poszczególnych treningów (Entropia)...")
+    if not df_ent.empty:
+        for algo in algos_in_analysis:
+            df_algo = df_ent[df_ent['Algorithm'] == algo]
+            
+            plt.figure(figsize=(10, 6))
+            sns.lineplot(
+                data=df_algo, 
+                x='Step_Binned', 
+                y='Value_Smoothed', 
+                hue='Run', 
+                palette='tab10',
+                linewidth=2
+            )
+            plt.xlabel("Liczba Kroków (Steps)", fontsize=12)
+            plt.ylabel("Wartość Entropii", fontsize=12)
+            plt.xlim(0, MAX_STEPS)
+            plt.legend(title="Numer treningu (Run)")
+            plt.tight_layout()
+            plt.savefig(os.path.join(out_dirs['runs_ent'], f"{algo}_runs_entropy_10m.png"), dpi=300)
+            plt.close()
 
     print("\nZakończono generowanie wykresów!")
 
